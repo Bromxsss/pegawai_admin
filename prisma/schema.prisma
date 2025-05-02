@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model absen {
+  id_absen Int      @id @default(autoincrement())
+  nip      String   @db.VarChar(255)
+  tgl      DateTime @default(now()) @db.Timestamp(0)
+  status   Boolean
+
+  @@index([nip], map: "nip")
+  @@index([status], map: "status")
+  @@index([tgl], map: "tgl")
+}
+
+model siap_dosen {
+  id_dosen    Int      @id @default(autoincrement())
+  id_kelas_mk Int?
+  id_pegawai  Int?     @default(0) @db.SmallInt
+  no          Boolean? @default(false)
+  ket         String?  @db.Text
+  pembagi     Int?     @default(16) @db.TinyInt
+
+  @@index([id_kelas_mk], map: "id_kelas_mk")
+  @@index([id_pegawai], map: "id_pegawai")
+}
+
+model simpeg_bagian {
+  id_bagian   Int    @id @db.TinyInt
+  nama_bagian String @db.VarChar(20)
+}
+
+model simpeg_jabatan_fungsional {
+  id_jabatan_fungsional   Int    @id @default(autoincrement())
+  nama_jabatan_fungsional String @db.VarChar(30)
+}
+
+model simpeg_jabatan_fungsional_kependidikan {
+  id_jabatan_fungsional   Int    @id @default(autoincrement())
+  nama_jabatan_fungsional String @db.VarChar(30)
+  tingkat                 String @db.VarChar(20)
+}
+
+model simpeg_jabatan_struktural {
+  id_jabatan_struktural   Int    @id @default(autoincrement()) @db.SmallInt
+  nama_jabatan_struktural String @default("") @db.VarChar(100)
+  id_jurusan              Int    @db.TinyInt
+}
+
+model simpeg_level_pendidikan {
+  id_level_pendidikan   Int    @id @default(autoincrement()) @db.SmallInt
+  nama_level_pendidikan String @db.VarChar(50)
+}
+
+model simpeg_pangkat_gol_ruang {
+  id_pangkat_gol_ruang   Int    @id @default(autoincrement())
+  nama_pangkat_gol_ruang String @db.VarChar(50)
+}
+
+model simpeg_pegawai {
+  id_pegawai        Int       @id @default(autoincrement()) @db.SmallInt
+  nama_pegawai      String?   @db.VarChar(60)
+  panggilan         String    @db.VarChar(150)
+  jk                String    @db.Char(1)
+  id_agama          Int       @db.TinyInt
+  tempat_lahir      String?   @db.VarChar(40)
+  nama_ibu          String?   @db.VarChar(60)
+  tgl_lahir         DateTime? @db.Date
+  nidn              String    @db.Char(10)
+  nip_lama          String?   @db.VarChar(25)
+  nip_baru          String    @db.VarChar(50)
+  npwp              String?   @db.VarChar(20)
+  no_ktp            String    @db.VarChar(20)
+  no_kk             String    @db.VarChar(20)
+  no_serdos         String?   @db.VarChar(15)
+  no_karpeg         String    @db.VarChar(20)
+  no_askes          String?   @db.VarChar(15)
+  no_karis          String?   @db.VarChar(20)
+  gol_darah         String    @db.Char(2)
+  tmt_cpns          DateTime? @db.Date
+  tmt_pns           DateTime? @db.Date
+  id_pendidikan     String    @db.Char(1)
+  tmt_pensiun       DateTime? @db.Date
+  id_status_hidup   String?   @db.Char(1)
+  alamat            String    @db.VarChar(255)
+  kota              String?   @db.VarChar(100)
+  kode_pos          String    @db.VarChar(6)
+  id_kabupaten      String    @db.Char(10)
+  id_prov           String    @db.Char(2)
+  id_kab            String    @db.Char(4)
+  id_kec            String    @db.Char(6)
+  id_kel            String    @db.Char(10)
+  telpon            String    @db.VarChar(13)
+  handphone         String    @default("") @db.VarChar(20)
+  email             String    @db.VarChar(255)
+  email_poliban     String    @db.VarChar(100)
+  website           String    @db.VarChar(30)
+  id_status_pegawai String    @db.VarChar(5)
+  id_jurusan        Int       @db.TinyInt
+  id_bagian         Int       @db.TinyInt
+  id_prodi          Int       @db.SmallInt
+  id_prodi_mk       String    @db.VarChar(10)
+  foto1             String?   @default("blm_ada_foto.jpg") @db.VarChar(25)
+  foto              String    @db.VarChar(25)
+  foto_kartu        String    @db.VarChar(25)
+  foto_ktp          String    @db.VarChar(100)
+  foto_keluarga     String    @db.VarChar(100)
+  foto_npwp         String    @db.VarChar(100)
+  foto_karpeg       String    @db.VarChar(100)
+  foto_taspen       String    @db.VarChar(100)
+  foto_karis        String    @db.VarChar(100)
+  foto_surat_nikah  String    @db.VarChar(100)
+  foto_nip          String    @db.VarChar(100)
+  status_update     Boolean   @default(false)
+  status_10_th      Boolean   @default(true)
+  status_20_th      Boolean   @default(true)
+  status_30_th      Boolean   @default(true)
+  no_kuota          String    @db.VarChar(14)
+  provider          String    @db.VarChar(20)
+  last_access_kuota DateTime? @db.Date
+}
+
+model simpeg_status_pegawai {
+  id_status_pegawai   Int    @id @default(autoincrement()) @db.TinyInt
+  nama_status_pegawai String @default("") @db.VarChar(50)
+  aktif               String @db.Char(1)
+}
+
+model user_level {
+  id_level   Int     @id
+  nama_level String  @db.Char(20)
+
+  // Relasi ke users
+  users users[]
+}
+
+model users {
+  id_user      Int          @id @default(autoincrement())
+  level        Int          @db.SmallInt
+  username     String       @unique(map: "username") @db.Char(35)
+  ref_user     String?      @db.VarChar(100)
+  password     String?      @db.VarChar(100)
+  nama_lengkap String?      @db.VarChar(100)
+  email        String?      @db.VarChar(100)
+  no_telp      String?      @db.VarChar(100)
+  aktif        users_aktif
+  blokir       users_blokir @default(N)
+  ket          String?      @db.VarChar(255)
+  id_session   String?      @db.VarChar(255)
+
+  // Relasi ke user_level
+  user_level   user_level   @relation(fields: [level], references: [id_level])
+}
+
+enum users_aktif {
+  Y
+  N
+}
+
+enum users_blokir {
+  Y
+  N
+}
