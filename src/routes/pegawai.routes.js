@@ -11,7 +11,7 @@ router.put('/:id', auth('admin'), pegawaiController.update);
 router.delete('/:id', auth('admin'), pegawaiController.delete);
 
 // Routes untuk Pegawai (hanya update terbatas)
-router.put('/profile/update', auth('pegawai'), pegawaiController.updateProfile);
+router.put('/profile/update/:id', auth('pegawai'), pegawaiController.updateProfile);
 
 
 module.exports = router;

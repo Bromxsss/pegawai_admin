@@ -197,33 +197,50 @@ exports.update = async (req, res) => {
 // ... existing code ...
 
 // Update - Perbarui Profil Pegawai (Pegawai hanya bisa edit sebagian)
+// ... existing code ...
+
+// Update - Perbarui Profil Pegawai (Pegawai hanya bisa edit sebagian)
 exports.updateProfile = async (req, res) => {
   try {
-    const { id } = req.params; // Ensure id is taken from req.params
+    const { id } = req.params;
     
-    // Find pegawai based on id_pegawai
+    // Verifikasi bahwa user yang login adalah pemilik data
+    // Ambil userId dari token JWT yang disimpan di req.user
+    const userId = req.user?.userId;
+    
+    // Cek apakah pegawai ada
     const pegawai = await prisma.simpeg_pegawai.findUnique({
-      where: { id_pegawai: parseInt(id) } // Ensure id_pegawai is passed correctly
+      where: { id_pegawai: parseInt(id) }
     });
     
     if (!pegawai) {
-      return res.status(404).json({ message: 'Profil pegawai tidak ditemukan' });
+      return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
     }
     
-    // Update pegawai
-    const { nama_pegawai, panggilan, jk } = req.body;
-    const updated = await prisma.simpeg_pegawai.update({
-      where: { id_pegawai: parseInt(id) },
-      data: { 
-        nama_pegawai, 
-        panggilan, 
-        jk 
+    // Hanya izinkan update field tertentu untuk pegawai biasa
+    const allowedFields = [
+      "nama_pegawai",
+      "panggilan",
+      "jk"
+    ];
+    
+    // Filter data yang akan diupdate
+    const filteredData = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        filteredData[field] = req.body[field];
       }
+    }
+    
+    // Update data pegawai dengan field yang diizinkan saja
+    const updatedPegawai = await prisma.simpeg_pegawai.update({
+      where: { id_pegawai: parseInt(id) },
+      data: filteredData
     });
     
-    res.json({ 
+    res.json({
       message: 'Profil berhasil diperbarui',
-      data: updated
+      data: updatedPegawai
     });
   } catch (error) {
     console.error('Error:', error);
@@ -233,6 +250,10 @@ exports.updateProfile = async (req, res) => {
     });
   }
 };
+
+// Delete - Hapus Pegawai (Admin Only)
+
+
 // In authController.js
 // exports.linkUserToPegawai = async (req, res) => {
 //   try {
