@@ -1,106 +1,126 @@
 const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = new PrismaClient();
 
-exports.register = async (req, res) => {
-  try {
-    console.log('Request body:', req.body);
-    
-    const { username, password, level = 2 } = req.body;
-    
-    // Validasi input
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Username dan password harus diisi' });
-    }
-    
-    // Cek apakah username sudah ada
-    const existingUser = await prisma.users.findUnique({
-      where: { username }
-    });
-    
-    if (existingUser) {
-      return res.status(400).json({ message: 'Username sudah digunakan' });
-    }
-    
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Buat user baru
-    const user = await prisma.users.create({
-      data: {
-        username,
-        password: hashedPassword,
-        level: parseInt(level),
-        aktif: 'Y',
-        blokir: 'N'
-      }
-    });
-    
-    // Kirim respons sukses tanpa token
-    res.status(201).json({ 
-      message: 'Registrasi berhasil',
-      user: {
-        id: user.id_user,
-        username: user.username,
-        level: user.level
-      }
-    });
-  } catch (error) {
-    console.error('Error saat registrasi:', error);
-    res.status(500).json({ message: 'Terjadi kesalahan saat registrasi', error: error.message });
-  }
-};
-
-// Fungsi login tetap menghasilkan token
+// Login untuk admin dan pegawai
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    
-    // Validasi input
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Username dan password harus diisi' });
-    }
+    console.log('Login attempt:', username, password);
     
     // Cari user berdasarkan username
     const user = await prisma.users.findUnique({
       where: { username }
     });
     
-    // Jika user tidak ditemukan atau password salah
+    console.log('User found:', user);
+    
     if (!user) {
       return res.status(401).json({ message: 'Username atau password salah' });
     }
     
-    // Verifikasi password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    // Verifikasi password (sebaiknya gunakan bcrypt untuk produksi)
+    if (user.password !== password) {
       return res.status(401).json({ message: 'Username atau password salah' });
+    }
+    
+    // Cek apakah user aktif
+    if (user.aktif !== 'Y') {
+      return res.status(401).json({ message: 'Akun tidak aktif' });
+    }
+    
+    // Cek apakah user diblokir
+    if (user.blokir === 'Y') {
+      return res.status(401).json({ message: 'Akun diblokir' });
+    }
+    
+    // Cari data pegawai berdasarkan email atau username (NIP)
+    let pegawaiData = null;
+    
+    // Jika user adalah admin atau pegawai biasa
+    if (user.level === 1 || user.level === 2) {
+      console.log('Searching pegawai with email:', user.email, 'or nip:', user.username);
+      
+      pegawaiData = await prisma.simpeg_pegawai.findFirst({
+        where: {
+          OR: [
+            { email: user.email },
+            { nip: user.username }
+          ]
+        },
+        select: {
+          id_pegawai: true,
+          nip: true,
+          nama_pegawai: true,
+          id_jabatan_struktural: true,
+          id_status_pegawai: true
+        }
+      });
+      
+      console.log('Pegawai data found:', pegawaiData);
+      
+      if (pegawaiData) {
+        // Ambil data jabatan struktural
+        const jabatan = await prisma.simpeg_jabatan_struktural.findUnique({
+          where: { id_jabatan_struktural: pegawaiData.id_jabatan_struktural }
+        });
+        
+        console.log('Jabatan found:', jabatan);
+        
+        if (jabatan) {
+          pegawaiData.jabatan = jabatan.nama_jabatan_struktural;
+        }
+        
+        // Ambil data status pegawai
+        const statusPegawai = await prisma.simpeg_status_pegawai.findFirst({
+          where: { id_status_pegawai: parseInt(pegawaiData.id_status_pegawai) }
+        });
+        
+        console.log('Status pegawai found:', statusPegawai);
+        
+        if (statusPegawai) {
+          pegawaiData.status = statusPegawai.nama_status_pegawai;
+        }
+      }
     }
     
     // Generate JWT token
     const token = jwt.sign(
       { 
         userId: user.id_user, 
-        level: user.level,
-        username: user.username
+        role: user.level,
+        pegawaiId: pegawaiData ? pegawaiData.id_pegawai : null
       },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      process.env.JWT_SECRET || 'rahasia',
+      { expiresIn: '1d' }
     );
     
-    // Kirim token ke client
-    res.status(200).json({ 
+    // Kirim response dengan data yang diminta
+    res.json({
       message: 'Login berhasil',
       token,
       user: {
         id: user.id_user,
         username: user.username,
-        level: user.level
+        role: user.level,
+        nama: user.nama_lengkap,
+        pegawai: pegawaiData ? {
+          id: pegawaiData.id_pegawai,
+          nip: pegawaiData.nip,
+          nama: pegawaiData.nama_pegawai,
+          jabatan: pegawaiData.jabatan || '',
+          status: pegawaiData.status || ''
+        } : {
+          id: null,
+          nip: user.username,
+          nama: user.nama_lengkap,
+          jabatan: user.level === 1 ? 'Administrator' : 'Pegawai',
+          status: 'Aktif'
+        }
       }
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Terjadi kesalahan pada server', error: error.message });
+    res.status(500).json({ message: 'Terjadi kesalahan saat login', error: error.message });
   }
 };
