@@ -106,6 +106,10 @@ exports.getPegawaiById = async (req, res) => {
 };
 
 // Tambah pegawai baru (Admin)
+// Tambah pegawai baru (Admin)
+// ... existing code ...
+
+// Tambah pegawai baru (Admin)
 exports.createPegawai = async (req, res) => {
   try {
     const pegawaiData = req.body;
@@ -115,16 +119,22 @@ exports.createPegawai = async (req, res) => {
       return res.status(400).json({ message: 'Nama, NIP, dan NIK pegawai wajib diisi' });
     }
     
-    // Buat pegawai baru
-    const newPegawai = await prisma.simpeg_pegawai.create({
-      data: {
-        // ... existing code ...
-      }
+    // Cek apakah NIP sudah terdaftar
+    const existingPegawai = await prisma.simpeg_pegawai.findFirst({
+      where: { nip: pegawaiData.nip }
     });
     
-    // Buat akun user untuk pegawai baru
+    if (existingPegawai) {
+      return res.status(400).json({ message: 'NIP sudah terdaftar' });
+    }
+    
     // Password default bisa menggunakan 6 digit terakhir NIK atau NIP
     const defaultPassword = pegawaiData.no_ktp.slice(-6);
+    
+    // Buat pegawai baru
+    const newPegawai = await prisma.simpeg_pegawai.create({
+      data: pegawaiData
+    });
     
     // Cek apakah username sudah ada
     const existingUser = await prisma.users.findUnique({
@@ -164,6 +174,9 @@ exports.createPegawai = async (req, res) => {
     });
   }
 };
+
+// ... existing code ...
+
 // Update pegawai (Admin)
 exports.updatePegawai = async (req, res) => {
   try {
@@ -184,6 +197,32 @@ exports.updatePegawai = async (req, res) => {
       where: { id_pegawai: parseInt(id) },
       data: pegawaiData
     });
+    
+    // Update user jika ada perubahan pada NIP atau nama
+    if (pegawaiData.nip || pegawaiData.nama_pegawai) {
+      const user = await prisma.users.findFirst({
+        where: { username: existingPegawai.nip }
+      });
+      
+      if (user) {
+        const updateData = {};
+        
+        if (pegawaiData.nip && pegawaiData.nip !== existingPegawai.nip) {
+          updateData.username = pegawaiData.nip;
+        }
+        
+        if (pegawaiData.nama_pegawai) {
+          updateData.nama_lengkap = pegawaiData.nama_pegawai;
+        }
+        
+        if (Object.keys(updateData).length > 0) {
+          await prisma.users.update({
+            where: { id_user: user.id_user },
+            data: updateData
+          });
+        }
+      }
+    }
     
     res.json({
       message: 'Data pegawai berhasil diperbarui',

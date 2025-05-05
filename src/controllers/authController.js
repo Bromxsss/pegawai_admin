@@ -95,9 +95,17 @@ exports.login = async (req, res) => {
       { expiresIn: '1d' }
     );
     
+    // Buat pesan selamat datang berdasarkan level user
+    let welcomeMessage = 'Login berhasil';
+    if (user.level === 1) {
+      welcomeMessage = 'Selamat login sebagai Admin Pegawai';
+    } else if (user.level === 2) {
+      welcomeMessage = 'Selamat Anda login sebagai Pegawai';
+    }
+    
     // Kirim response dengan data yang diminta
     res.json({
-      message: 'Login berhasil',
+      message: welcomeMessage,
       token,
       user: {
         id: user.id_user,
