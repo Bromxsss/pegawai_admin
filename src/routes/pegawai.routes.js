@@ -6,9 +6,10 @@ const { verifyToken, isAdminPegawai } = require('../middlewares/auth');
 // Routes untuk Admin (CRUD penuh)
 router.post('/', verifyToken, isAdminPegawai, pegawaiController.createPegawai);
 router.get('/', verifyToken, isAdminPegawai, pegawaiController.getAllPegawai);
-router.get('/:id', verifyToken, pegawaiController.getPegawaiById);
+router.get('/:id', verifyToken, isAdminPegawai, pegawaiController.getPegawaiById);
 router.put('/:id', verifyToken, isAdminPegawai, pegawaiController.updatePegawai);
-router.delete('/:id', verifyToken, isAdminPegawai, pegawaiController.deletePegawai);
+// Fix: Change this line to use a proper controller method
+router.delete('/pegawai/:id', pegawaiController.deletePegawai);
 
 // Routes untuk Pegawai (hanya update terbatas)
 router.put('/profile/update/:id', verifyToken, pegawaiController.updateProfile);

@@ -197,6 +197,10 @@ exports.updatePegawai = async (req, res) => {
       where: { id_pegawai: parseInt(id) },
       data: pegawaiData
     });
+    res.json({
+      message: 'Data pegawai berhasil diperbarui',
+      data: updatedPegawai
+    });
     
     // Update user jika ada perubahan pada NIP atau nama
     if (pegawaiData.nip || pegawaiData.nama_pegawai) {
