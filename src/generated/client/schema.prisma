@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client" // Specify your desired output path
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model kol_agama {
+  id_agama   Int    @id @default(0) @db.TinyInt
+  nama_agama String @db.VarChar(100)
+  id_feeder  Int?   @db.TinyInt
+}
+
+model kol_darah {
+  id_darah   Int    @id @default(autoincrement()) @db.SmallInt
+  nama_darah String @db.Text
+}
+
+model kol_jk {
+  id_jk   Int    @id @default(autoincrement()) @db.SmallInt
+  nama_jk String @db.Text
+  ket     String @db.VarChar(15)
+}
+
+model kol_jurusan {
+  id_jurusan   Int         @id @default(autoincrement())
+  nama_jurusan String?     @db.VarChar(100)
+  kol_prodi    kol_prodi[]
+}
+
+model kol_kabupaten {
+  id_kabupaten   String  @id @db.Char(10)
+  nama_kabupaten String? @db.VarChar(50)
+  id_provinsi    String? @db.Char(2)
+}
+
+model kol_pendidikan {
+  id_pendidikan   String  @id @db.Char(2)
+  nama_pendidikan String? @db.VarChar(50)
+}
+
+model kol_prodi {
+  id_prodi    Int          @id @default(autoincrement())
+  id_jurusan  Int?
+  nama_prodi  String?      @db.VarChar(100)
+  singkatan   String?      @db.VarChar(100)
+  kol_jurusan kol_jurusan? @relation(fields: [id_jurusan], references: [id_jurusan], onDelete: Restrict, onUpdate: Restrict, map: "kol_prodi_ibfk_1")
+
+  @@index([id_jurusan], map: "id_jurusan")
+}
+
+model kol_provinsi {
+  id_prov   String @id @db.Char(2)
+  nama_prov String @db.TinyText
+}
+
+model kol_status_hidup {
+  id_status_hidup   String  @id @default("") @db.Char(1)
+  nama_status_hidup String? @db.VarChar(50)
+}
+
+model kol_wilayah {
+  id_wil           String  @id @db.Char(8)
+  nm_wil           String  @db.VarChar(50)
+  id_induk_wilayah String? @db.VarChar(50)
+  id_level_wil     Int
+
+  @@index([id_induk_wilayah], map: "id_induk_wilayah")
+  @@index([id_wil], map: "id_wil")
+}
+
+model permintaan_perubahan_data {
+  id_permintaan       Int                                          @id @default(autoincrement())
+  id_pegawai          Int
+  tanggal_permintaan  DateTime?                                    @default(now()) @db.DateTime(0)
+  status_permintaan   permintaan_perubahan_data_status_permintaan? @default(pending)
+  tanggal_persetujuan DateTime?                                    @db.DateTime(0)
+  id_admin            Int?
+  data_lama           String?                                      @db.LongText
+  data_baru           String?                                      @db.LongText
+  keterangan          String?                                      @db.Text
+}
+
+model siap_dosen {
+  id_dosen    Int      @id @default(autoincrement())
+  id_kelas_mk Int?
+  id_pegawai  Int?     @default(0) @db.SmallInt
+  no          Boolean? @default(false)
+  ket         String?  @db.Text
+  pembagi     Int?     @default(16) @db.TinyInt
+
+  @@index([id_kelas_mk], map: "id_kelas_mk")
+  @@index([id_pegawai], map: "id_pegawai")
+}
+
+model simpeg_bagian {
+  id_bagian   Int    @id @db.TinyInt
+  nama_bagian String @db.VarChar(20)
+}
+
+model simpeg_jabatan_fungsional {
+  id_jabatan_fungsional   Int    @id @default(autoincrement())
+  nama_jabatan_fungsional String @db.VarChar(30)
+}
+
+model simpeg_jabatan_fungsional_kependidikan {
+  id_jabatan_fungsional   Int    @id @default(autoincrement())
+  nama_jabatan_fungsional String @db.VarChar(30)
+  tingkat                 String @db.VarChar(20)
+}
+
+model simpeg_jabatan_struktural {
+  id_jabatan_struktural   Int    @id @default(autoincrement()) @db.SmallInt
+  id_jurusan              Int?
+  nama_jabatan_struktural String @default("") @db.VarChar(100)
+}
+
+model simpeg_pangkat_gol_ruang {
+  id_pangkat_gol_ruang   Int    @id @default(autoincrement())
+  nama_pangkat_gol_ruang String @db.VarChar(50)
+}
+
+model simpeg_pegawai {
+  id_pegawai            Int       @id @default(autoincrement()) @db.SmallInt
+  nama_pegawai          String?   @db.VarChar(60)
+  panggilan             String?   @db.VarChar(150)
+  jk                    String    @db.Char(1)
+  id_agama              Int       @db.TinyInt
+  tempat_lahir          String?   @db.VarChar(40)
+  nama_ibu              String?   @db.VarChar(60)
+  tgl_lahir             DateTime? @db.Date
+  nidn                  String    @db.Char(10)
+  nip                   String    @db.VarChar(50)
+  no_ktp                String    @db.VarChar(20)
+  no_kk                 String    @db.VarChar(20)
+  no_serdos             String?   @db.VarChar(15)
+  no_karpeg             String    @db.VarChar(20)
+  gol_darah             String    @db.Char(2)
+  tmt_cpns              DateTime? @db.Date
+  tmt_pns               DateTime? @db.Date
+  id_pendidikan         String    @db.Char(1)
+  tmt_pensiun           DateTime? @db.Date
+  id_status_hidup       String?   @db.Char(1)
+  alamat                String    @db.VarChar(255)
+  kota                  String?   @db.VarChar(100)
+  kode_pos              String    @db.VarChar(6)
+  id_wil                String    @db.Char(8)
+  id_kabupaten          String    @db.Char(10)
+  id_prov               String    @db.Char(2)
+  telpon                String    @db.VarChar(13)
+  handphone             String    @default("") @db.VarChar(20)
+  email                 String    @db.VarChar(255)
+  email_poliban         String    @db.VarChar(100)
+  website               String    @db.VarChar(30)
+  id_jabatan_fungsional Int       @db.SmallInt
+  id_jabatan_struktural Int       @db.SmallInt
+  id_status_pegawai     Int       @db.TinyInt
+  id_jurusan            Int?
+  id_bagian             Int       @db.TinyInt
+  id_prodi              Int?
+  foto                  String    @db.VarChar(25)
+  foto_ktp              String    @db.VarChar(100)
+  foto_npwp             String    @db.VarChar(100)
+  foto_karpeg           String    @db.VarChar(100)
+  foto_surat_nikah      String    @db.VarChar(100)
+  foto_taspen           String    @db.VarChar(100)
+  foto_nip              String    @db.VarChar(100)
+  status_update         Boolean   @default(false)
+  status_10_th          Boolean   @default(true)
+  status_20_th          Boolean   @default(true)
+  status_30_th          Boolean   @default(true)
+
+  @@index([id_jabatan_struktural], map: "simpeg_pegawai_id_jabatan_struktural_fkey")
+  @@index([id_kabupaten], map: "simpeg_pegawai_id_kabupaten_fkey")
+  @@index([id_prov], map: "simpeg_pegawai_id_prov_fkey")
+  @@index([id_status_pegawai], map: "simpeg_pegawai_id_status_pegawai_fkey")
+}
+
+model simpeg_status_pegawai {
+  id_status_pegawai   Int    @id @default(autoincrement()) @db.TinyInt
+  nama_status_pegawai String @default("") @db.VarChar(50)
+  aktif               String @db.Char(1)
+}
+
+model user_level {
+  id_level   Int    @id @default(autoincrement())
+  nama_level String @db.Char(20)
+}
+
+model users {
+  id_user      Int          @id @default(autoincrement())
+  level        Int          @db.SmallInt
+  username     String       @unique(map: "username") @db.Char(35)
+  password     String?      @db.VarChar(100)
+  nama_lengkap String?      @db.VarChar(100)
+  email        String?      @db.VarChar(100)
+  no_telp      String?      @db.VarChar(100)
+  aktif        users_aktif
+  blokir       users_blokir @default(N)
+  ket          String?      @db.VarChar(255)
+
+  @@index([level], map: "users_level_fkey")
+}
+
+model data_change_requests {
+  id              Int       @id @default(autoincrement())
+  pegawai_id      Int       @db.SmallInt
+  field_name      String
+  current_value   String    @db.Text
+  requested_value String    @db.Text
+  reason          String    @db.Text
+  status          String
+  requested_at    DateTime
+  processed_at    DateTime?
+  admin_notes     String?   @db.Text
+
+  @@index([pegawai_id], map: "data_change_requests_pegawai_id_fkey")
+  @@map("data_change_requests")
+}
+
+enum permintaan_perubahan_data_status_permintaan {
+  pending
+  approved
+  rejected
+}
+
+enum users_aktif {
+  Y
+  N
+}
+
+enum users_blokir {
+  Y
+  N
+}

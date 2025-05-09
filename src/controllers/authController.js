@@ -35,54 +35,65 @@ exports.login = async (req, res) => {
     }
     
     // Cari data pegawai berdasarkan email atau username (NIP)
-    let pegawaiData = null;
-    
-    // Jika user adalah admin atau pegawai biasa
-    if (user.level === 1 || user.level === 2) {
-      console.log('Searching pegawai with email:', user.email, 'or nip:', user.username);
-      
-      pegawaiData = await prisma.simpeg_pegawai.findFirst({
-        where: {
-          OR: [
-            { email: user.email },
-            { nip: user.username }
-          ]
-        },
-        select: {
-          id_pegawai: true,
-          nip: true,
-          nama_pegawai: true,
-          id_jabatan_struktural: true,
-          id_status_pegawai: true
-        }
-      });
-      
-      console.log('Pegawai data found:', pegawaiData);
-      
-      if (pegawaiData) {
-        // Ambil data jabatan struktural
-        const jabatan = await prisma.simpeg_jabatan_struktural.findUnique({
-          where: { id_jabatan_struktural: pegawaiData.id_jabatan_struktural }
-        });
-        
-        console.log('Jabatan found:', jabatan);
-        
-        if (jabatan) {
-          pegawaiData.jabatan = jabatan.nama_jabatan_struktural;
-        }
-        
-        // Ambil data status pegawai
-        const statusPegawai = await prisma.simpeg_status_pegawai.findFirst({
-          where: { id_status_pegawai: parseInt(pegawaiData.id_status_pegawai) }
-        });
-        
-        console.log('Status pegawai found:', statusPegawai);
-        
-        if (statusPegawai) {
-          pegawaiData.status = statusPegawai.nama_status_pegawai;
-        }
-      }
+   // ... existing code ...
+
+// Cari data pegawai berdasarkan email atau username (NIP)
+let pegawaiData = null;
+
+// Jika user adalah admin atau pegawai biasa
+if (user.level === 1 || user.level === 2) {
+  console.log('Searching pegawai with email:', user.email, 'or nip:', user.username);
+
+  const whereClause = {
+    OR: [
+      { nip: user.username }
+    ]
+  };
+
+  // Add email to the where clause only if it's not null
+  if (user.email) {
+    whereClause.OR.push({ email: user.email });
+  }
+
+  pegawaiData = await prisma.simpeg_pegawai.findFirst({
+    where: whereClause,
+    select: {
+      id_pegawai: true,
+      nip: true,
+      nama_pegawai: true,
+      id_jabatan_struktural: true,
+      id_status_pegawai: true
     }
+  });
+
+  console.log('Pegawai data found:', pegawaiData);
+
+  if (pegawaiData) {
+    // Ambil data jabatan struktural
+    const jabatan = await prisma.simpeg_jabatan_struktural.findUnique({
+      where: { id_jabatan_struktural: pegawaiData.id_jabatan_struktural }
+    });
+
+    console.log('Jabatan found:', jabatan);
+
+    if (jabatan) {
+      pegawaiData.jabatan = jabatan.nama_jabatan_struktural;
+    }
+
+    // Ambil data status pegawai
+    const statusPegawai = await prisma.simpeg_status_pegawai.findFirst({
+      where: { id_status_pegawai: parseInt(pegawaiData.id_status_pegawai) }
+    });
+
+    console.log('Status pegawai found:', statusPegawai);
+
+    if (statusPegawai) {
+      pegawaiData.status = statusPegawai.nama_status_pegawai;
+    }
+  }
+}
+
+// ... existing code ...
     
     // Generate JWT token
     const token = jwt.sign(
