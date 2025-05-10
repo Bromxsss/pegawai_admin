@@ -1,0 +1,752 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "API CRUD Pegawai",
+      "description": "Dokumentasi API untuk CRUD Pegawai"
+    },
+    "host": "localhost:4000",
+    "basePath": "/api",
+    "schemes": ["http"],
+    "paths": {
+      "/api/pegawai": {
+        "get": {
+          "summary": "Dapatkan daftar pegawai",
+          "description": "Mengembalikan daftar semua pegawai dengan detail lengkap",
+          "tags": ["Pegawai"],
+          "security": [
+            {
+              "Bearer": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Daftar pegawai berhasil diambil",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Pegawai"
+                }
+              }
+            },
+            "401": {
+              "description": "Token tidak valid atau tidak ditemukan"
+            },
+            "403": {
+              "description": "Akses ditolak. Hanya admin pegawai yang diizinkan"
+            },
+            "500": {
+              "description": "Terjadi kesalahan saat mengambil data pegawai"
+            }
+          }
+        },
+        "post": {
+          "summary": "Tambah pegawai baru",
+          "description": "Menambahkan data pegawai baru ke dalam sistem",
+          "tags": ["Pegawai"],
+          "security": [
+            {
+              "Bearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/PegawaiInput"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Pegawai berhasil ditambahkan",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Pegawai berhasil ditambahkan dan akun user dibuat"
+                  },
+                  "data": {
+                    "$ref": "#/definitions/Pegawai"
+                  },
+                  "userAccount": {
+                    "type": "object",
+                    "properties": {
+                      "username": {
+                        "type": "string"
+                      },
+                      "password": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Data tidak valid atau NIP sudah terdaftar"
+            },
+            "401": {
+              "description": "Token tidak valid atau tidak ditemukan"
+            },
+            "403": {
+              "description": "Akses ditolak. Hanya admin pegawai yang diizinkan"
+            },
+            "500": {
+              "description": "Terjadi kesalahan saat menambahkan pegawai"
+            }
+          }
+        }
+      },
+      "/api/pegawai/{id}": {
+        "get": {
+          "summary": "Dapatkan detail pegawai",
+          "description": "Mengembalikan detail lengkap dari seorang pegawai berdasarkan ID",
+          "tags": ["Pegawai"],
+          "security": [
+            {
+              "Bearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "integer",
+              "description": "ID pegawai"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Detail pegawai berhasil diambil",
+              "schema": {
+                "$ref": "#/definitions/PegawaiDetail"
+              }
+            },
+            "401": {
+              "description": "Token tidak valid atau tidak ditemukan"
+            },
+            "403": {
+              "description": "Akses ditolak. Hanya admin pegawai yang diizinkan"
+            },
+            "404": {
+              "description": "Pegawai tidak ditemukan"
+            },
+            "500": {
+              "description": "Terjadi kesalahan saat mengambil detail pegawai"
+            }
+          }
+        },
+        "put": {
+          "summary": "Update data pegawai",
+          "description": "Memperbarui data pegawai berdasarkan ID",
+          "tags": ["Pegawai"],
+          "security": [
+            {
+              "Bearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "integer",
+              "description": "ID pegawai"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/PegawaiInput"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Data pegawai berhasil diperbarui",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Data pegawai berhasil diperbarui"
+                  },
+                  "data": {
+                    "$ref": "#/definitions/Pegawai"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Token tidak valid atau tidak ditemukan"
+            },
+            "403": {
+              "description": "Akses ditolak. Hanya admin pegawai yang diizinkan"
+            },
+            "404": {
+              "description": "Pegawai tidak ditemukan"
+            },
+            "500": {
+              "description": "Terjadi kesalahan saat memperbarui data pegawai"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Hapus pegawai",
+          "description": "Menghapus data pegawai berdasarkan ID",
+          "tags": ["Pegawai"],
+          "security": [
+            {
+              "Bearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "integer",
+              "description": "ID pegawai"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Pegawai berhasil dihapus",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Pegawai berhasil dihapus"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Token tidak valid atau tidak ditemukan"
+            },
+            "403": {
+              "description": "Akses ditolak. Hanya admin pegawai yang diizinkan"
+            },
+            "404": {
+              "description": "Pegawai tidak ditemukan"
+            },
+            "500": {
+              "description": "Terjadi kesalahan saat menghapus pegawai"
+            }
+          }
+        }
+      },
+      "/api/pegawai/profile/non-sensitive/{id}": {
+        "put": {
+          "summary": "Update data non-sensitif pegawai",
+          "description": "Memperbarui data non-sensitif pegawai (dapat dilakukan oleh pegawai sendiri)",
+          "tags": ["Profil Pegawai"],
+          "security": [
+            {
+              "Bearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "integer",
+              "description": "ID pegawai"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/PegawaiNonSensitiveInput"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Data non-sensitif berhasil diperbarui",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Data non-sensitif berhasil diperbarui"
+                  },
+                  "data": {
+                    "$ref": "#/definitions/Pegawai"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Token tidak valid atau tidak ditemukan"
+            },
+            "403": {
+              "description": "Akses ditolak. Anda tidak memiliki izin untuk data ini"
+            },
+            "404": {
+              "description": "Pegawai tidak ditemukan"
+            },
+            "500": {
+              "description": "Terjadi kesalahan saat memperbarui data"
+            }
+          }
+        }
+      },
+      "/api/pegawai/profile/request-sensitive/{id}": {
+        "post": {
+          "summary": "Ajukan perubahan data sensitif",
+          "description": "Mengajukan permintaan perubahan data sensitif pegawai",
+          "tags": ["Profil Pegawai"],
+          "security": [
+            {
+              "Bearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "integer",
+              "description": "ID pegawai"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/SensitiveDataChangeRequest"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Permintaan perubahan data berhasil diajukan",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Permintaan perubahan data berhasil diajukan"
+                  },
+                  "request": {
+                    "$ref": "#/definitions/DataChangeRequest"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Token tidak valid atau tidak ditemukan"
+            },
+            "403": {
+              "description": "Akses ditolak. Anda tidak memiliki izin untuk data ini"
+            },
+            "404": {
+              "description": "Pegawai tidak ditemukan"
+            },
+            "500": {
+              "description": "Terjadi kesalahan saat mengajukan permintaan"
+            }
+          }
+        }
+      },
+      "/api/pegawai/admin/change-requests": {
+        "get": {
+          "summary": "Dapatkan semua permintaan perubahan data",
+          "description": "Mengembalikan daftar semua permintaan perubahan data sensitif",
+          "tags": ["Admin"],
+          "security": [
+            {
+              "Bearer": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Daftar permintaan perubahan data berhasil diambil",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/DataChangeRequest"
+                }
+              }
+            },
+            "401": {
+              "description": "Token tidak valid atau tidak ditemukan"
+            },
+            "403": {
+              "description": "Akses ditolak. Hanya admin pegawai yang diizinkan"
+            },
+            "500": {
+              "description": "Terjadi kesalahan saat mengambil data"
+            }
+          }
+        }
+      },
+      "/api/auth/login": {
+        "post": {
+          "summary": "Login",
+          "description": "Login untuk admin dan pegawai",
+          "tags": ["Auth"],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "required": ["username", "password"],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "example": "198601252015051001"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Login berhasil",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Selamat login sebagai Admin Pegawai"
+                  },
+                  "token": {
+                    "type": "string"
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "integer"
+                      },
+                      "nama": {
+                        "type": "string"
+                      },
+                      "pegawai": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "nip": {
+                            "type": "string"
+                          },
+                          "nama": {
+                            "type": "string"
+                          },
+                          "jabatan": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Username atau password salah"
+            },
+            "500": {
+              "description": "Terjadi kesalahan saat login"
+            }
+          }
+        }
+      }
+    },
+    "securityDefinitions": {
+      "Bearer": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "Masukkan token JWT dengan format: Bearer {token}"
+      }
+    },
+    "definitions": {
+      "Pegawai": {
+        "type": "object",
+        "properties": {
+          "id_pegawai": {
+            "type": "integer"
+          },
+          "nama_pegawai": {
+            "type": "string"
+          },
+          "nip": {
+            "type": "string"
+          },
+          "no_ktp": {
+            "type": "string"
+          },
+          "tgl_lahir": {
+            "type": "string",
+            "format": "date"
+          },
+          "jk": {
+            "type": "string",
+            "enum": ["L", "P"]
+          },
+          "id_prov": {
+            "type": "integer"
+          },
+          "id_kabupaten": {
+            "type": "integer"
+          },
+          "kota": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "handphone": {
+            "type": "string"
+          },
+          "id_status_pegawai": {
+            "type": "string"
+          },
+          "id_jabatan_struktural": {
+            "type": "integer"
+          },
+          "provinsi": {
+            "type": "string"
+          },
+          "kabupaten": {
+            "type": "string"
+          },
+          "status_pegawai": {
+            "type": "string"
+          },
+          "simpeg_jabatan_struktural": {
+            "type": "object",
+            "properties": {
+              "id_jabatan_struktural": {
+                "type": "integer"
+              },
+              "nama_jabatan_struktural": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "PegawaiDetail": {
+        "type": "object",
+        "properties": {
+          "id_pegawai": {
+            "type": "integer"
+          },
+          "nama_pegawai": {
+            "type": "string"
+          },
+          "nip": {
+            "type": "string"
+          },
+          "no_ktp": {
+            "type": "string"
+          },
+          "tgl_lahir": {
+            "type": "string",
+            "format": "date"
+          },
+          "jk": {
+            "type": "string",
+            "enum": ["L", "P"]
+          },
+          "id_prov": {
+            "type": "integer"
+          },
+          "id_kabupaten": {
+            "type": "integer"
+          },
+          "kota": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "handphone": {
+            "type": "string"
+          },
+          "id_status_pegawai": {
+            "type": "string"
+          },
+          "id_jabatan_struktural": {
+            "type": "integer"
+          },
+          "provinsi": {
+            "type": "string"
+          },
+          "kabupaten": {
+            "type": "string"
+          },
+          "status_pegawai": {
+            "type": "string"
+          },
+          "jabatan": {
+            "type": "string"
+          }
+        }
+      },
+      "PegawaiInput": {
+        "type": "object",
+        "required": ["nama_pegawai", "nip", "no_ktp"],
+        "properties": {
+          "nama_pegawai": {
+            "type": "string",
+            "example": "Budi Santoso"
+          },
+          "nip": {
+            "type": "string",
+            "example": "198601252015051001"
+          },
+          "no_ktp": {
+            "type": "string",
+            "example": "3201012501860001"
+          },
+          "tgl_lahir": {
+            "type": "string",
+            "format": "date",
+            "example": "1986-01-25"
+          },
+          "jk": {
+            "type": "string",
+            "enum": ["L", "P"],
+            "example": "L"
+          },
+          "id_prov": {
+            "type": "integer",
+            "example": 32
+          },
+          "id_kabupaten": {
+            "type": "integer",
+            "example": 3201
+          },
+          "kota": {
+            "type": "string",
+            "example": "Bogor"
+          },
+          "email": {
+            "type": "string",
+            "example": "budi.santoso@example.com"
+          },
+          "handphone": {
+            "type": "string",
+            "example": "081234567890"
+          },
+          "id_status_pegawai": {
+            "type": "string",
+            "example": "1"
+          },
+          "id_jabatan_struktural": {
+            "type": "integer",
+            "example": 5
+          }
+        }
+      },
+      "PegawaiNonSensitiveInput": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "budi.santoso@example.com"
+          },
+          "handphone": {
+            "type": "string",
+            "example": "081234567890"
+          },
+          "kota": {
+            "type": "string",
+            "example": "Bogor"
+          }
+        }
+      },
+      "SensitiveDataChangeRequest": {
+        "type": "object",
+        "required": ["field", "new_value", "reason"],
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "no_ktp"
+          },
+          "new_value": {
+            "type": "string",
+            "example": "3201012501860002"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Perbaikan kesalahan penulisan NIK"
+          }
+        }
+      },
+      "DataChangeRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "pegawai_id": {
+            "type": "integer"
+          },
+          "field": {
+            "type": "string"
+          },
+          "old_value": {
+            "type": "string"
+          },
+          "new_value": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "approved", "rejected"]
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "admin_notes": {
+            "type": "string"
+          },
+          "pegawai": {
+            "$ref": "#/definitions/Pegawai"
+          }
+        }
+      }
+    }
+  }

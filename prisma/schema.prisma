@@ -1,11 +1,26 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/client" // Specify your desired output path
 }
 
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model data_change_requests {
+  id              Int       @id @default(autoincrement())
+  pegawai_id      Int       @db.SmallInt
+  field_name      String
+  current_value   String    @db.Text
+  requested_value String    @db.Text
+  reason          String    @db.Text
+  status          String
+  requested_at    DateTime
+  processed_at    DateTime?
+  admin_notes     String?   @db.Text
+
+  @@index([pegawai_id], map: "data_change_requests_pegawai_id_fkey")
+    @@map("data_change_requests")
 }
 
 model kol_agama {
@@ -157,7 +172,7 @@ model simpeg_pegawai {
   website               String    @db.VarChar(30)
   id_jabatan_fungsional Int       @db.SmallInt
   id_jabatan_struktural Int       @db.SmallInt
-  id_status_pegawai     Int       @db.TinyInt
+  id_status_pegawai     String    @db.VarChar(4)
   id_jurusan            Int?
   id_bagian             Int       @db.TinyInt
   id_prodi              Int?
@@ -203,22 +218,6 @@ model users {
   ket          String?      @db.VarChar(255)
 
   @@index([level], map: "users_level_fkey")
-}
-
-model data_change_requests {
-  id              Int       @id @default(autoincrement())
-  pegawai_id      Int       @db.SmallInt
-  field_name      String
-  current_value   String    @db.Text
-  requested_value String    @db.Text
-  reason          String    @db.Text
-  status          String
-  requested_at    DateTime
-  processed_at    DateTime?
-  admin_notes     String?   @db.Text
-
-  @@index([pegawai_id], map: "data_change_requests_pegawai_id_fkey")
-  @@map("data_change_requests")
 }
 
 enum permintaan_perubahan_data_status_permintaan {

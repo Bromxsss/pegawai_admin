@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/client" // Specify your desired output path
+   output   = "../src/generated/client"
+  
 }
 
 datasource db {
@@ -157,7 +158,7 @@ model simpeg_pegawai {
   website               String    @db.VarChar(30)
   id_jabatan_fungsional Int       @db.SmallInt
   id_jabatan_struktural Int       @db.SmallInt
-  id_status_pegawai     Int       @db.TinyInt
+ id_status_pegawai     String    @db.VarChar(5)
   id_jurusan            Int?
   id_bagian             Int       @db.TinyInt
   id_prodi              Int?
