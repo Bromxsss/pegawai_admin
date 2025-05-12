@@ -20,8 +20,7 @@ exports.getAllPegawai = async (req, res) => {
         id_status_pegawai: true,
         id_jabatan_struktural: true
       },
-      include: {
-        simpeg_jabatan_struktural: true
+      orderBy: {
       }
     });
     
