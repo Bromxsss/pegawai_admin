@@ -394,95 +394,304 @@
         }
       }
     },
-    "/api/auth/login": {
-      "post": {
-        "summary": "Login",
-        "description": "Login untuk admin dan pegawai",
-        "tags": ["Auth"],
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": ["username", "password"],
-              "properties": {
-                "username": {
-                  "type": "string",
-                  "example": "198601252015051001"
-                },
-                "password": {
-                  "type": "string",
-                  "example": "password123"
-                }
-              }
+  
+"http://localhost:4000/api/auth/login": {
+  "post": {
+    "summary": "Login Admin",
+    "description": "Login khusus untuk admin",
+    "tags": ["Auth"],
+    "parameters": [
+      {
+        "name": "body",
+        "in": "body",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": ["username", "password"],
+          "properties": {
+            "username": {
+              "type": "string",
+              "example": "198601252015051001"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123"
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Login berhasil",
-            "schema": {
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Login berhasil",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Selamat login sebagai Admin Pegawai"
+            },
+            "token": {
+              "type": "string"
+            },
+            "user": {
               "type": "object",
               "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Selamat login sebagai Admin Pegawai"
+                "id": {
+                  "type": "integer"
                 },
-                "token": {
+                "username": {
                   "type": "string"
                 },
-                "user": {
+                "role": {
+                  "type": "integer"
+                },
+                "nama": {
+                  "type": "string"
+                },
+                "pegawai": {
                   "type": "object",
                   "properties": {
                     "id": {
                       "type": "integer"
                     },
-                    "username": {
+                    "nip": {
                       "type": "string"
-                    },
-                    "role": {
-                      "type": "integer"
                     },
                     "nama": {
                       "type": "string"
                     },
-                    "pegawai": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        },
-                        "nip": {
-                          "type": "string"
-                        },
-                        "nama": {
-                          "type": "string"
-                        },
-                        "jabatan": {
-                          "type": "string"
-                        },
-                        "status": {
-                          "type": "string"
-                        }
-                      }
+                    "jabatan": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
                     }
                   }
                 }
               }
             }
-          },
-          "401": {
-            "description": "Username atau password salah"
-          },
-          "500": {
-            "description": "Terjadi kesalahan saat login"
+          }
+        }
+      },
+      "401": {
+        "description": "Username atau password salah"
+      },
+      "500": {
+        "description": "Terjadi kesalahan saat login"
+      }
+    }
+  }
+},
+"/api/auth/login": {
+  "post": {
+    "summary": "Login Pegawai",
+    "description": "Login khusus untuk pegawai",
+    "tags": ["Auth"],
+    "parameters": [
+      {
+        "name": "body",
+        "in": "body",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": ["username", "password"],
+          "properties": {
+            "username": {
+              "type": "string",
+              "example": "198601252015051001"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123"
+            }
+          }
+        }
+      }
+    ],
+
+"responses": {
+  "200": {
+    "description": "Login berhasil",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Selamat Anda login sebagai Pegawai"
+        },
+        "token": {
+          "type": "string"
+        },
+        "user": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "username": {
+              "type": "string"
+            },
+            "role": {
+              "type": "integer"
+            },
+            "nama": {
+              "type": "string"
+            },
+            "pegawai": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "nip": {
+                  "type": "string"
+                },
+                "nama": {
+                  "type": "string"
+                },
+                "jabatan": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "panggilan": {
+                  "type": "string"
+                },
+                "jk": {
+                  "type": "string"
+                },
+                "id_agama": {
+                  "type": "integer"
+                },
+                "tempat_lahir": {
+                  "type": "string"
+                },
+                "nama_ibu": {
+                  "type": "string"
+                },
+                "tgl_lahir": {
+                  "type": "string"
+                },
+                "nidn": {
+                  "type": "string"
+                },
+                "no_ktp": {
+                  "type": "string"
+                },
+                "no_kk": {
+                  "type": "string"
+                },
+                "no_serdos": {
+                  "type": "string"
+                },
+                "no_karpeg": {
+                  "type": "string"
+                },
+                "gol_darah": {
+                  "type": "string"
+                },
+                "tmt_cpns": {
+                  "type": "string"
+                },
+                "tmt_pns": {
+                  "type": "string"
+                },
+                "id_pendidikan": {
+                  "type": "string"
+                },
+                "tmt_pensiun": {
+                  "type": "string"
+                },
+                "id_status_hidup": {
+                  "type": "string"
+                },
+                "alamat": {
+                  "type": "string"
+                },
+                "kota": {
+                  "type": "string"
+                },
+                "kode_pos": {
+                  "type": "string"
+                },
+                "id_wil": {
+                  "type": "string"
+                },
+                "id_kabupaten": {
+                  "type": "string"
+                },
+                "id_prov": {
+                  "type": "string"
+                },
+                "telpon": {
+                  "type": "string"
+                },
+                "handphone": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "email_poliban": {
+                  "type": "string"
+                },
+                "website": {
+                  "type": "string"
+                },
+                "id_jabatan_fungsional": {
+                  "type": "integer"
+                },
+                "id_jurusan": {
+                  "type": "integer"
+                },
+                "id_bagian": {
+                  "type": "integer"
+                },
+                "id_prodi": {
+                  "type": "integer"
+                },
+                "foto": {
+                  "type": "string"
+                },
+                "foto_ktp": {
+                  "type": "string"
+                },
+                "foto_npwp": {
+                  "type": "string"
+                },
+                "foto_karpeg": {
+                  "type": "string"
+                },
+                "foto_surat_nikah": {
+                  "type": "string"
+                },
+                "foto_taspen": {
+                  "type": "string"
+                },
+                "foto_nip": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
     }
   },
+      "401": {
+        "description": "Username atau password salah"
+      },
+      "500": {
+        "description": "Terjadi kesalahan saat login"
+      }
+    }
+  }
+}
+
+  },
+  
   "securityDefinitions": {
     "Bearer": {
       "type": "apiKey",
