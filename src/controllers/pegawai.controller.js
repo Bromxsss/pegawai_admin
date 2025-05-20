@@ -12,32 +12,44 @@ export const getAllPegawai = async (req, res) => {
         nama_pegawai: true,
         nip: true,
         no_ktp: true,
+        tgl_lahir: true,
         jk: true,
-        id_agama: true,
-        nidn: true,
-        no_kk: true,
-        gol_darah: true,
-        id_pendidikan: true,
-        alamat: true,
-        kota: true,
-        kode_pos: true,
-        id_wil: true,
-        id_kabupaten: true,
         id_prov: true,
+        id_kabupaten: true,
+        kota: true,
+        email: true,
         handphone: true,
-        email_poliban: true,
-        id_jabatan_fungsional: true,
-        id_jabatan_struktural: true,
         id_status_pegawai: true,
-        id_bagian: true,
-        foto: true
+        id_jabatan_struktural: true
       },
-      orderBy: {
-        nama_pegawai: 'asc'
+      include: {
+        simpeg_jabatan_struktural: true
       }
     });
-
-    res.json(pegawai);
+    
+    // Ambil data provinsi, kabupaten, dan status pegawai
+    const pegawaiWithDetails = await Promise.all(pegawai.map(async (p) => {
+      const provinsi = await prisma.kol_provinsi.findUnique({
+        where: { id_prov: p.id_prov }
+      });
+      
+      const kabupaten = await prisma.kol_kabupaten.findUnique({
+        where: { id_kabupaten: p.id_kabupaten }
+      });
+      
+      const statusPegawai = await prisma.simpeg_status_pegawai.findFirst({
+        where: { id_status_pegawai: parseInt(p.id_status_pegawai) }
+      });
+      
+      return {
+        ...p,
+        provinsi: provinsi ? provinsi.nama_prov : null,
+        kabupaten: kabupaten ? kabupaten.nama_kabupaten : null,
+        status_pegawai: statusPegawai ? statusPegawai.nama_status_pegawai : null
+      };
+    }));
+    
+    res.json(pegawaiWithDetails);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({
