@@ -1,28 +1,42 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { darahMapping, pendidikanMapping, statusHidupMapping, jurusanMapping, jkMapping, kabupatenMapping, agamaMapping, wilayahMapping } from './mappings.js';
+const prisma = new PrismaClient();
 
 // Ambil semua pegawai (Admin)
 export const getAllPegawai = async (req, res) => {
   try {
     const pegawai = await prisma.simpeg_pegawai.findMany({
-      select: {
-        id_pegawai: true,
-        nama_pegawai: true,
-        nip: true,
-        no_ktp: true,
-        tgl_lahir: true,
-        jk: true,
-        id_prov: true,
-        id_kabupaten: true,
-        kota: true,
-        email: true,
-        handphone: true,
-        id_status_pegawai: true,
-        id_jabatan_struktural: true
-      },
+      // select: {
+      //   id_pegawai: true,
+      //   nama_pegawai: true,
+      //   nip: true,
+      //   no_ktp: true,
+      //   tgl_lahir: true,
+      //   jk: true,
+      //   id_prov: true,
+      //   id_kabupaten: true,
+      //   kota: true,
+      //   email: true,
+      //   handphone: true,
+      //   id_status_pegawai: true,
+      //   id_jabatan_struktural: true
+      // },
       include: {
-        simpeg_jabatan_struktural: true
+        simpeg_riwayat_pangkat: true,
+        simpeg_riwayat_pendidikan: true,
+        kol_agama: true,
+        kol_darah: true,
+        kol_status_hidup: true,
+        kol_pendidikan: true,
+        kol_wilayah: true,
+        kol_kabupaten: true,
+        kol_provinsi: true,
+        simpeg_bagian: true,
+        kol_jurusan: true,
+        kol_prodi: true,
+        simpeg_jabatan_struktural: true,
+        simpeg_jabatan_fungsional: true
       }
     });
     
@@ -42,11 +56,16 @@ export const getAllPegawai = async (req, res) => {
       
       return {
         ...p,
-        provinsi: provinsi ? provinsi.nama_prov : null,
-        kabupaten: kabupaten ? kabupaten.nama_kabupaten : null,
-        status_pegawai: statusPegawai ? statusPegawai.nama_status_pegawai : null
-      };
-    }));
+        gol_darah: darahMapping[pegawai.gol_darah],
+        id_pendidikan: pendidikanMapping[pegawai.id_pendidikan],
+        id_status_hidup: statusHidupMapping[pegawai.id_status_hidup],
+        id_jurusan: jurusanMapping[pegawai.id_jurusan],
+        jk: jkMapping[pegawai.jk], // Menggunakan mapping untuk menampilkan deskripsi
+        kabupaten: kabupatenMapping[pegawai.id_kabupaten],
+        agama: agamaMapping[pegawai.id_agama],
+        wilayah: wilayahMapping[pegawai.id_wil],
+    };
+}));
     
     res.json(pegawaiWithDetails);
   } catch (error) {
@@ -200,6 +219,8 @@ if (pegawaiData.id_prodi) {
 };
 
 // Ambil detail pegawai (Admin & Pegawai)
+// ... existing code ...
+
 export const getPegawaiById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -234,7 +255,7 @@ export const getPegawaiById = async (req, res) => {
       id_pendidikan: pendidikanMapping[pegawai.id_pendidikan],
       id_status_hidup: statusHidupMapping[pegawai.id_status_hidup],
       id_jurusan: jurusanMapping[pegawai.id_jurusan],
-      jk: jkMapping[pegawai.jk],
+      jk: jkMapping[pegawai.jk], // Menggunakan mapping untuk menampilkan deskripsi
       kabupaten: kabupatenMapping[pegawai.id_kabupaten],
       agama: agamaMapping[pegawai.id_agama],
       wilayah: wilayahMapping[pegawai.id_wil],
@@ -249,6 +270,8 @@ export const getPegawaiById = async (req, res) => {
     });
   }
 };
+
+// ... existing code ...
 
 // Update pegawai (Admin)
 export const updatePegawai = async (req, res) => {
