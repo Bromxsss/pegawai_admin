@@ -1,9 +1,10 @@
-const { PrismaClient } = require('@prisma/client');
-const jwt = require('jsonwebtoken');
+import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
+
 const prisma = new PrismaClient();
 
 // Login untuk admin dan pegawai
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { username, password } = req.body;
     console.log('Login attempt:', username, password);
@@ -35,51 +36,77 @@ exports.login = async (req, res) => {
     }
     
     // Cari data pegawai berdasarkan email atau username (NIP)
-   // ... existing code ...
+    let pegawaiData = null;
 
-// Cari data pegawai berdasarkan email atau username (NIP)
-let pegawaiData = null;
+    // Jika user adalah admin atau pegawai biasa
+    if (user.level === 1 || user.level === 2) {
+      console.log('Searching pegawai with email:', user.email, 'or nip:', user.username);
 
-// Jika user adalah admin atau pegawai biasa
-if (user.level === 1 || user.level === 2) {
-  console.log('Searching pegawai with email:', user.email, 'or nip:', user.username);
+      const whereClause = {
+        OR: [
+          { nip: user.username }
+        ]
+      };
 
-  const whereClause = {
-    OR: [
-      { nip: user.username }
-    ]
-  };
+      // Add email to the where clause only if it's not null
+      if (user.email) {
+        whereClause.OR.push({ email_poliban: user.email });
+      }
 
-  // Add email to the where clause only if it's not null
-  if (user.email) {
-    whereClause.OR.push({ email: user.email });
-  }
+      // ... existing code ...
 
-  pegawaiData = await prisma.simpeg_pegawai.findFirst({
-    where: whereClause,
-    select: {
-      id_pegawai: true,
-      nip: true,
-      nama_pegawai: true,
-      id_jabatan_struktural: true,
-      id_status_pegawai: true
-    }
-  });
+      pegawaiData = await prisma.simpeg_pegawai.findFirst({
+        where: {
+          OR: [
+            { email_poliban: user.email },
+            { nip: user.username }
+          ]
+        },
+        select: {
+          id_pegawai: true,
+          nama_pegawai: true,
+          nip: true,
+          // Hapus atau ganti field status dengan field yang benar-benar ada
+          jk: true,
+          id_agama: true,
+          tempat_lahir: true,
+          tgl_lahir: true,
+          nidn: true,
+          no_ktp: true,
+          no_kk: true,
+          gol_darah: true,
+          id_pendidikan: true,
+          id_status_hidup: true,
+          alamat: true,
+          kota: true,
+          kode_pos: true,
+          id_wil: true,
+          id_kabupaten: true,
+          id_prov: true,
+          handphone: true,
+          email_poliban: true,
+          id_jabatan_struktural: true,
+          id_jabatan_fungsional: true,
+          id_riwayat_pangkat: true,
+          id_riwayat_pendidikan: true,
+          id_status_pegawai: true,
+          id_jurusan: true,
+          id_bagian: true,
+          id_prodi: true,
+          foto: true
+        }
+      });
+      // ... existing code ...
 
-  console.log('Pegawai data found:', pegawaiData);
+      console.log('Pegawai data found:', pegawaiData);
 
-  if (pegawaiData) {
-    // Ambil data jabatan struktural
-    const jabatan = await prisma.simpeg_jabatan_struktural.findUnique({
-      where: { id_jabatan_struktural: pegawaiData.id_jabatan_struktural }
-    });
+     // ... existing code ...
 
-    console.log('Jabatan found:', jabatan);
+// ... existing code ...
 
-    if (jabatan) {
-      pegawaiData.jabatan = jabatan.nama_jabatan_struktural;
-    }
-
+if (pegawaiData) {
+  // Pastikan id_status_pegawai tidak undefined dan memiliki nilai
+  if (pegawaiData.id_status_pegawai !== undefined && pegawaiData.id_status_pegawai !== null) {
     // Ambil data status pegawai
     const statusPegawai = await prisma.simpeg_status_pegawai.findFirst({
       where: { id_status_pegawai: parseInt(pegawaiData.id_status_pegawai) }
@@ -90,17 +117,23 @@ if (user.level === 1 || user.level === 2) {
     if (statusPegawai) {
       pegawaiData.status = statusPegawai.nama_status_pegawai;
     }
+  } else {
+    console.log('id_status_pegawai is undefined or null');
   }
 }
+    }
 
 // ... existing code ...
+
+// ... existing code ...
+    
     
     // Generate JWT token
     const token = jwt.sign(
       { 
         userId: user.id_user, 
         role: user.level,
-        pegawaiId: pegawaiData ? pegawaiData.id_pegawai : null
+        pegawaiId: pegawaiData ? pegawaiData.id_pegawai : true,
       },
       process.env.JWT_SECRET || 'rahasia',
       { expiresIn: '1d' }
@@ -127,10 +160,37 @@ if (user.level === 1 || user.level === 2) {
           id: pegawaiData.id_pegawai,
           nip: pegawaiData.nip,
           nama: pegawaiData.nama_pegawai,
-          jabatan: pegawaiData.jabatan || '',
-          status: pegawaiData.status || ''
+          jabatan: pegawaiData.jabatan,
+          status: pegawaiData.status,
+          jk: pegawaiData.jk,
+          id_agama: pegawaiData.id_agama,
+          tempat_lahir: pegawaiData.tempat_lahir,
+          tgl_lahir: pegawaiData.tgl_lahir,
+          nidn: pegawaiData.nidn,
+          no_ktp: pegawaiData.no_ktp,
+          no_kk: pegawaiData.no_kk,
+          gol_darah: pegawaiData.gol_darah,
+          id_pendidikan: pegawaiData.id_pendidikan,
+          id_status_hidup: pegawaiData.id_status_hidup,
+          alamat: pegawaiData.alamat,
+          kota: pegawaiData.kota,
+          kode_pos: pegawaiData.kode_pos,
+          id_wil: pegawaiData.id_wil,
+          id_kabupaten: pegawaiData.id_kabupaten,
+          id_prov: pegawaiData.id_prov,
+          handphone: pegawaiData.handphone,
+          email_poliban: pegawaiData.email_poliban,
+          id_jabatan_struktural: pegawaiData.id_jabatan_struktural,
+          id_jabatan_fungsional: pegawaiData.id_jabatan_fungsional,
+          id_riwayat_pangkat: pegawaiData.id_riwayat_pangkat,
+          id_riwayat_pendidikan: pegawaiData.id_riwayat_pendidikan,
+          id_status_pegawai: pegawaiData.id_status_pegawai,
+          id_jurusan: pegawaiData.id_jurusan,
+          id_bagian: pegawaiData.id_bagian,
+          id_prodi: pegawaiData.id_prodi,
+          foto: pegawaiData.foto || 'blm_ada_foto.jpg'
         } : {
-          id: null,
+          id: user.id_user,
           nip: user.username,
           nama: user.nama_lengkap,
           jabatan: user.level === 1 ? 'Administrator' : 'Pegawai',
@@ -143,3 +203,5 @@ if (user.level === 1 || user.level === 2) {
     res.status(500).json({ message: 'Terjadi kesalahan saat login', error: error.message });
   }
 };
+
+export default { login };

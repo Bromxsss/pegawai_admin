@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/client" // Specify your desired output path
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -8,15 +8,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model aktivitas_kelas {
+  id_aktivitas_kelas  Int     @id
+  judul_akt_kelas     String? @db.VarChar(100)
+  deskripsi_akt_kelas String? @db.Text
+}
+
+model data_change_requests {
+  id              Int            @id @default(autoincrement())
+  id_pegawai      Int            @db.SmallInt
+  field_name      String
+  current_value   String         @db.Text
+  requested_value String         @db.Text
+  reason          String         @db.Text
+  status          String
+  requested_at    DateTime       @db.DateTime(0)
+  processed_at    DateTime?      @db.DateTime(0)
+  admin_notes     String?        @db.Text
+  simpeg_pegawai  simpeg_pegawai @relation(fields: [id_pegawai], references: [id_pegawai], onUpdate: Restrict, map: "data_change_requests_ibfk_1")
+
+  @@index([id_pegawai], map: "data_change_requests_id_pegawai_fkey")
+}
+
 model kol_agama {
-  id_agama   Int    @id @default(0) @db.TinyInt
-  nama_agama String @db.VarChar(100)
-  id_feeder  Int?   @db.TinyInt
+  id_agama       Int              @id @default(0) @db.TinyInt
+  nama_agama     String           @db.VarChar(100)
+  id_feeder      Int?             @db.TinyInt
+  simpeg_pegawai simpeg_pegawai[]
 }
 
 model kol_darah {
-  id_darah   Int    @id @default(autoincrement()) @db.SmallInt
-  nama_darah String @db.Text
+  id_darah       Int              @id @default(autoincrement()) @db.SmallInt
+  nama_darah     String           @db.Text
+  simpeg_pegawai simpeg_pegawai[]
 }
 
 model kol_jk {
@@ -26,167 +50,223 @@ model kol_jk {
 }
 
 model kol_jurusan {
-  id_jurusan   Int         @id @default(autoincrement())
-  nama_jurusan String?     @db.VarChar(100)
-  kol_prodi    kol_prodi[]
+  id_jurusan     Int              @id @default(autoincrement())
+  nama_jurusan   String           @db.VarChar(100)
+  kol_prodi      kol_prodi[]
+  simpeg_pegawai simpeg_pegawai[]
 }
 
 model kol_kabupaten {
-  id_kabupaten   String  @id @db.Char(10)
-  nama_kabupaten String? @db.VarChar(50)
-  id_provinsi    String? @db.Char(2)
+  id_kabupaten   String           @id @db.Char(10)
+  nama_kabupaten String           @db.VarChar(50)
+  id_provinsi    String?          @db.Char(2)
+  kol_provinsi   kol_provinsi?    @relation(fields: [id_provinsi], references: [id_prov], onDelete: Restrict, onUpdate: Restrict, map: "kol_kabupaten_ibfk_1")
+  simpeg_pegawai simpeg_pegawai[]
+
+  @@index([id_provinsi], map: "id_provinsi")
 }
 
 model kol_pendidikan {
-  id_pendidikan   String  @id @db.Char(2)
-  nama_pendidikan String? @db.VarChar(50)
+  id_pendidikan   Int              @id @db.TinyInt
+  nama_pendidikan String?          @db.VarChar(50)
+  simpeg_pegawai  simpeg_pegawai[]
 }
 
 model kol_prodi {
-  id_prodi    Int          @id @default(autoincrement())
-  id_jurusan  Int?
-  nama_prodi  String?      @db.VarChar(100)
-  singkatan   String?      @db.VarChar(100)
-  kol_jurusan kol_jurusan? @relation(fields: [id_jurusan], references: [id_jurusan], onDelete: Restrict, onUpdate: Restrict, map: "kol_prodi_ibfk_1")
+  id_prodi       Int              @id @default(autoincrement())
+  id_jurusan     Int?
+  nama_prodi     String?          @db.VarChar(100)
+  singkatan      String?          @db.VarChar(100)
+  kol_jurusan    kol_jurusan?     @relation(fields: [id_jurusan], references: [id_jurusan], onDelete: Restrict, onUpdate: Restrict, map: "kol_prodi_ibfk_1")
+  simpeg_pegawai simpeg_pegawai[]
 
   @@index([id_jurusan], map: "id_jurusan")
 }
 
 model kol_provinsi {
-  id_prov   String @id @db.Char(2)
-  nama_prov String @db.TinyText
+  id_prov        String           @id @db.Char(2)
+  nama_prov      String           @db.TinyText
+  kol_kabupaten  kol_kabupaten[]
+  simpeg_pegawai simpeg_pegawai[]
+}
+
+model kol_status {
+  id_status                 Int                         @id @db.SmallInt
+  nama_status               String                      @db.VarChar(15)
+  simpeg_riwayat_pendidikan simpeg_riwayat_pendidikan[]
 }
 
 model kol_status_hidup {
-  id_status_hidup   String  @id @default("") @db.Char(1)
-  nama_status_hidup String? @db.VarChar(50)
+  id_status_hidup   Int              @id @default(autoincrement()) @db.TinyInt
+  nama_status_hidup String?          @db.VarChar(50)
+  simpeg_pegawai    simpeg_pegawai[]
 }
 
 model kol_wilayah {
-  id_wil           String  @id @db.Char(8)
-  nm_wil           String  @db.VarChar(50)
-  id_induk_wilayah String? @db.VarChar(50)
+  id_wil           String           @id @db.Char(8)
+  nm_wil           String           @db.VarChar(50)
+  id_induk_wilayah String?          @db.VarChar(50)
   id_level_wil     Int
+  simpeg_pegawai   simpeg_pegawai[]
 
   @@index([id_induk_wilayah], map: "id_induk_wilayah")
   @@index([id_wil], map: "id_wil")
 }
 
-model permintaan_perubahan_data {
-  id_permintaan       Int                                          @id @default(autoincrement())
-  id_pegawai          Int
-  tanggal_permintaan  DateTime?                                    @default(now()) @db.DateTime(0)
-  status_permintaan   permintaan_perubahan_data_status_permintaan? @default(pending)
-  tanggal_persetujuan DateTime?                                    @db.DateTime(0)
-  id_admin            Int?
-  data_lama           String?                                      @db.LongText
-  data_baru           String?                                      @db.LongText
-  keterangan          String?                                      @db.Text
-}
-
-model siap_dosen {
-  id_dosen    Int      @id @default(autoincrement())
-  id_kelas_mk Int?
-  id_pegawai  Int?     @default(0) @db.SmallInt
-  no          Boolean? @default(false)
-  ket         String?  @db.Text
-  pembagi     Int?     @default(16) @db.TinyInt
-
-  @@index([id_kelas_mk], map: "id_kelas_mk")
-  @@index([id_pegawai], map: "id_pegawai")
-}
-
 model simpeg_bagian {
-  id_bagian   Int    @id @db.TinyInt
-  nama_bagian String @db.VarChar(20)
+  id_bagian      Int              @id @db.TinyInt
+  nama_bagian    String           @db.VarChar(20)
+  simpeg_pegawai simpeg_pegawai[]
 }
 
 model simpeg_jabatan_fungsional {
-  id_jabatan_fungsional   Int    @id @default(autoincrement())
-  nama_jabatan_fungsional String @db.VarChar(30)
-}
-
-model simpeg_jabatan_fungsional_kependidikan {
-  id_jabatan_fungsional   Int    @id @default(autoincrement())
-  nama_jabatan_fungsional String @db.VarChar(30)
-  tingkat                 String @db.VarChar(20)
+  id_jabatan_fungsional   Int              @id @default(autoincrement())
+  nama_jabatan_fungsional String           @db.VarChar(30)
+  simpeg_pegawai          simpeg_pegawai[]
 }
 
 model simpeg_jabatan_struktural {
-  id_jabatan_struktural   Int    @id @default(autoincrement()) @db.SmallInt
+  id_jabatan_struktural   Int              @id @default(autoincrement()) @db.SmallInt
   id_jurusan              Int?
-  nama_jabatan_struktural String @default("") @db.VarChar(100)
+  nama_jabatan_struktural String           @default("") @db.VarChar(100)
+  simpeg_pegawai          simpeg_pegawai[]
+
+  @@index([id_jurusan], map: "simpeg_jabatan_struktural_ibfk_1")
+}
+
+model simpeg_level_pendidikan {
+  id_level_pendidikan       Int                         @id @db.SmallInt
+  nama_level_pendidikan     String                      @db.VarChar(50)
+  simpeg_riwayat_pendidikan simpeg_riwayat_pendidikan[]
 }
 
 model simpeg_pangkat_gol_ruang {
-  id_pangkat_gol_ruang   Int    @id @default(autoincrement())
-  nama_pangkat_gol_ruang String @db.VarChar(50)
+  id_pangkat_gol_ruang   Int                      @id
+  nama_pangkat_gol_ruang String                   @db.VarChar(50)
+  simpeg_riwayat_pangkat simpeg_riwayat_pangkat[]
 }
 
 model simpeg_pegawai {
-  id_pegawai            Int       @id @default(autoincrement()) @db.SmallInt
-  nama_pegawai          String?   @db.VarChar(60)
-  panggilan             String?   @db.VarChar(150)
-  jk                    String    @db.Char(1)
-  id_agama              Int       @db.TinyInt
-  tempat_lahir          String?   @db.VarChar(40)
-  nama_ibu              String?   @db.VarChar(60)
-  tgl_lahir             DateTime? @db.Date
-  nidn                  String    @db.Char(10)
-  nip                   String    @db.VarChar(50)
-  no_ktp                String    @db.VarChar(20)
-  no_kk                 String    @db.VarChar(20)
-  no_serdos             String?   @db.VarChar(15)
-  no_karpeg             String    @db.VarChar(20)
-  gol_darah             String    @db.Char(2)
-  tmt_cpns              DateTime? @db.Date
-  tmt_pns               DateTime? @db.Date
-  id_pendidikan         String    @db.Char(1)
-  tmt_pensiun           DateTime? @db.Date
-  id_status_hidup       String?   @db.Char(1)
-  alamat                String    @db.VarChar(255)
-  kota                  String?   @db.VarChar(100)
-  kode_pos              String    @db.VarChar(6)
-  id_wil                String    @db.Char(8)
-  id_kabupaten          String    @db.Char(10)
-  id_prov               String    @db.Char(2)
-  telpon                String    @db.VarChar(13)
-  handphone             String    @default("") @db.VarChar(20)
-  email                 String    @db.VarChar(255)
-  email_poliban         String    @db.VarChar(100)
-  website               String    @db.VarChar(30)
-  id_jabatan_fungsional Int       @db.SmallInt
-  id_jabatan_struktural Int       @db.SmallInt
-  id_status_pegawai     Int       @db.TinyInt
-  id_jurusan            Int?
-  id_bagian             Int       @db.TinyInt
-  id_prodi              Int?
-  foto                  String    @db.VarChar(25)
-  foto_ktp              String    @db.VarChar(100)
-  foto_npwp             String    @db.VarChar(100)
-  foto_karpeg           String    @db.VarChar(100)
-  foto_surat_nikah      String    @db.VarChar(100)
-  foto_taspen           String    @db.VarChar(100)
-  foto_nip              String    @db.VarChar(100)
-  status_update         Boolean   @default(false)
-  status_10_th          Boolean   @default(true)
-  status_20_th          Boolean   @default(true)
-  status_30_th          Boolean   @default(true)
+  id_pegawai                Int                       @id @default(autoincrement()) @db.SmallInt
+  nama_pegawai              String?                   @db.VarChar(60)
+  jk                        Int                       @db.SmallInt
+  id_agama                  Int                       @db.TinyInt
+  tempat_lahir              String?                   @db.VarChar(40)
+  tgl_lahir                 DateTime?                 @db.Date
+  nidn                      String                    @db.Char(10)
+  nip                       String                    @db.VarChar(18)
+  no_ktp                    String                    @db.VarChar(16)
+  no_kk                     String                    @db.VarChar(16)
+  gol_darah                 Int                       @db.SmallInt
+  id_pendidikan             Int                       @db.TinyInt
+  id_status_hidup           Int?                      @db.TinyInt
+  alamat                    String                    @db.VarChar(255)
+  kota                      String?                   @db.VarChar(100)
+  kode_pos                  String                    @db.VarChar(6)
+  id_wil                    String                    @db.Char(8)
+  id_kabupaten              String                    @db.Char(10)
+  id_prov                   String                    @db.Char(2)
+  handphone                 String                    @default("") @db.VarChar(20)
+  email_poliban             String                    @db.VarChar(150)
+  id_jabatan_struktural     Int                       @db.SmallInt
+  id_jabatan_fungsional     Int
+  id_riwayat_pangkat        Int
+  id_riwayat_pendidikan     Int
+  id_status_pegawai         Int                       @db.TinyInt
+  id_jurusan                Int?
+  id_bagian                 Int                       @db.TinyInt
+  id_prodi                  Int?
+  foto                      String?                   @default("blm_ada_foto.jpg") @db.VarChar(25)
+  data_change_requests      data_change_requests[]
+  simpeg_riwayat_pangkat    simpeg_riwayat_pangkat    @relation(fields: [id_riwayat_pangkat], references: [id_riwayat_pangkat], onDelete: Cascade, map: "simpeg_pegawai_ibfk_13")
+  simpeg_status_pegawai     simpeg_status_pegawai     @relation(fields: [id_status_pegawai], references: [id_status_pegawai], onDelete: Cascade, map: "simpeg_pegawai_ibfk_14")
+  simpeg_riwayat_pendidikan simpeg_riwayat_pendidikan @relation(fields: [id_riwayat_pendidikan], references: [id_riwayat_pendidikan], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_15")
+  kol_agama                 kol_agama                 @relation(fields: [id_agama], references: [id_agama], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_16")
+  kol_darah                 kol_darah                 @relation(fields: [gol_darah], references: [id_darah], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_17")
+  kol_status_hidup          kol_status_hidup?         @relation(fields: [id_status_hidup], references: [id_status_hidup], onDelete: Restrict, onUpdate: Restrict, map: "simpeg_pegawai_ibfk_19")
+  kol_pendidikan            kol_pendidikan            @relation(fields: [id_pendidikan], references: [id_pendidikan], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_20")
+  kol_wilayah               kol_wilayah               @relation(fields: [id_wil], references: [id_wil], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_21")
+  kol_kabupaten             kol_kabupaten             @relation(fields: [id_kabupaten], references: [id_kabupaten], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_22")
+  kol_provinsi              kol_provinsi              @relation(fields: [id_prov], references: [id_prov], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_23")
+  simpeg_bagian             simpeg_bagian             @relation(fields: [id_bagian], references: [id_bagian], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_24")
+  kol_jurusan               kol_jurusan?              @relation(fields: [id_jurusan], references: [id_jurusan], onDelete: Restrict, onUpdate: Restrict, map: "simpeg_pegawai_ibfk_25")
+  kol_prodi                 kol_prodi?                @relation(fields: [id_prodi], references: [id_prodi], onDelete: Restrict, onUpdate: Restrict, map: "simpeg_pegawai_ibfk_26")
+  simpeg_jabatan_struktural simpeg_jabatan_struktural @relation(fields: [id_jabatan_struktural], references: [id_jabatan_struktural], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_27")
+  simpeg_jabatan_fungsional simpeg_jabatan_fungsional @relation(fields: [id_jabatan_fungsional], references: [id_jabatan_fungsional], onUpdate: Restrict, map: "simpeg_pegawai_ibfk_28")
 
-  @@index([id_jabatan_struktural], map: "simpeg_pegawai_id_jabatan_struktural_fkey")
-  @@index([id_kabupaten], map: "simpeg_pegawai_id_kabupaten_fkey")
-  @@index([id_prov], map: "simpeg_pegawai_id_prov_fkey")
-  @@index([id_status_pegawai], map: "simpeg_pegawai_id_status_pegawai_fkey")
+  @@index([gol_darah], map: "gol_darah")
+  @@index([id_agama], map: "id_agama")
+  @@index([id_bagian], map: "id_bagian")
+  @@index([id_jabatan_fungsional], map: "id_jabatan_fungsional")
+  @@index([id_jabatan_struktural], map: "id_jabatan_struktural")
+  @@index([id_jurusan], map: "id_jurusan")
+  @@index([id_kabupaten], map: "id_kabupaten")
+  @@index([id_pendidikan], map: "id_pendidikan")
+  @@index([id_prodi], map: "id_prodi")
+  @@index([id_prov], map: "id_prov")
+  @@index([id_riwayat_pangkat], map: "id_riwayat_pangkat")
+  @@index([id_riwayat_pendidikan], map: "id_riwayat_pendidikan")
+  @@index([id_status_hidup], map: "id_status_hidup")
+  @@index([id_status_pegawai], map: "id_status_pegawai")
+  @@index([id_wil], map: "id_wil")
+  @@index([jk], map: "jk")
+}
+
+model simpeg_pendanaan {
+  id_pendanaan              Int                         @id @db.SmallInt
+  pendanaan                 String                      @db.VarChar(50)
+  simpeg_riwayat_pendidikan simpeg_riwayat_pendidikan[]
+}
+
+model simpeg_riwayat_pangkat {
+  id_riwayat_pangkat       Int                      @id @default(autoincrement())
+  id_pangkat_gol_ruang     Int
+  tmt_pangkat_gol_ruang    DateTime                 @db.Date
+  no_sk                    String                   @db.VarChar(30)
+  tgl_sk                   DateTime                 @db.Date
+  pejabat_penetap          String                   @db.VarChar(50)
+  gambar1_pangkat          String                   @db.VarChar(100)
+  gambar2_pangkat          String                   @db.VarChar(100)
+  simpeg_pegawai           simpeg_pegawai[]
+  simpeg_pangkat_gol_ruang simpeg_pangkat_gol_ruang @relation(fields: [id_pangkat_gol_ruang], references: [id_pangkat_gol_ruang], onUpdate: Restrict, map: "simpeg_riwayat_pangkat_ibfk_1")
+
+  @@index([id_pangkat_gol_ruang], map: "id_pangkat_gol_ruang")
+}
+
+model simpeg_riwayat_pendidikan {
+  id_riwayat_pendidikan   Int                     @id @default(autoincrement())
+  id_level_pendidikan     Int                     @db.SmallInt
+  nama_pendidikan         String                  @db.VarChar(100)
+  total_sks               Int
+  ipk                     Decimal                 @db.Decimal(4, 2)
+  fakultas_jurusan_prodi  String                  @db.VarChar(100)
+  tempat                  String                  @db.VarChar(100)
+  nama_pimpinan           String                  @db.VarChar(100)
+  id_pendanaan            Int                     @db.SmallInt
+  id_status               Int                     @db.SmallInt
+  thn_masuk               Int                     @db.Year
+  thn_lulus               Int                     @db.Year
+  gambar1_pendidikan      String                  @db.VarChar(100)
+  gambar2_pendidikan      String                  @db.VarChar(100)
+  simpeg_pegawai          simpeg_pegawai[]
+  simpeg_pendanaan        simpeg_pendanaan        @relation(fields: [id_pendanaan], references: [id_pendanaan], onDelete: Cascade, map: "simpeg_riwayat_pendidikan_ibfk_2")
+  simpeg_level_pendidikan simpeg_level_pendidikan @relation(fields: [id_level_pendidikan], references: [id_level_pendidikan], onUpdate: Restrict, map: "simpeg_riwayat_pendidikan_ibfk_3")
+  kol_status              kol_status              @relation(fields: [id_status], references: [id_status], onUpdate: Restrict, map: "simpeg_riwayat_pendidikan_ibfk_4")
+
+  @@index([id_level_pendidikan], map: "id_level_pendidikan")
+  @@index([id_pendanaan], map: "id_pendanaan")
+  @@index([id_status], map: "id_status")
 }
 
 model simpeg_status_pegawai {
-  id_status_pegawai   Int    @id @default(autoincrement()) @db.TinyInt
-  nama_status_pegawai String @default("") @db.VarChar(50)
-  aktif               String @db.Char(1)
+  id_status_pegawai   Int              @id @db.TinyInt
+  nama_status_pegawai String           @default("") @db.VarChar(50)
+  aktif               String           @db.Char(1)
+  simpeg_pegawai      simpeg_pegawai[]
 }
 
 model user_level {
-  id_level   Int    @id @default(autoincrement())
+  id_level   Int    @id @default(autoincrement()) @db.UnsignedTinyInt
   nama_level String @db.Char(20)
 }
 
@@ -201,30 +281,6 @@ model users {
   aktif        users_aktif
   blokir       users_blokir @default(N)
   ket          String?      @db.VarChar(255)
-
-  @@index([level], map: "users_level_fkey")
-}
-
-model data_change_requests {
-  id              Int       @id @default(autoincrement())
-  pegawai_id      Int       @db.SmallInt
-  field_name      String
-  current_value   String    @db.Text
-  requested_value String    @db.Text
-  reason          String    @db.Text
-  status          String
-  requested_at    DateTime
-  processed_at    DateTime?
-  admin_notes     String?   @db.Text
-
-  @@index([pegawai_id], map: "data_change_requests_pegawai_id_fkey")
-  @@map("data_change_requests")
-}
-
-enum permintaan_perubahan_data_status_permintaan {
-  pending
-  approved
-  rejected
 }
 
 enum users_aktif {

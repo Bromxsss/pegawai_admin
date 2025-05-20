@@ -5,4 +5,4 @@ const aktivitasController = require('../controllers/aktivitasController');
 router.get('/', aktivitasController.getAllAktivitas);
 router.post('/', aktivitasController.createAktivitas);
 
-module.exports = router;
+export default router;

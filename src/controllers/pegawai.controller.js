@@ -1,8 +1,10 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import { darahMapping, pendidikanMapping, statusHidupMapping, jurusanMapping, jkMapping, kabupatenMapping, agamaMapping, wilayahMapping } from '../mappings';
 const prisma = new PrismaClient();
 
 // Ambil semua pegawai (Admin)
-exports.getAllPegawai = async (req, res) => {
+export const getAllPegawai = async (req, res) => {
   try {
     const pegawai = await prisma.simpeg_pegawai.findMany({
       select: {
@@ -10,63 +12,90 @@ exports.getAllPegawai = async (req, res) => {
         nama_pegawai: true,
         nip: true,
         no_ktp: true,
-        tgl_lahir: true,
         jk: true,
-        id_prov: true,
-        id_kabupaten: true,
+        id_agama: true,
+        nidn: true,
+        no_kk: true,
+        gol_darah: true,
+        id_pendidikan: true,
+        alamat: true,
         kota: true,
-        email: true,
+        kode_pos: true,
+        id_wil: true,
+        id_kabupaten: true,
+        id_prov: true,
         handphone: true,
+        email_poliban: true,
+        id_jabatan_fungsional: true,
+        id_jabatan_struktural: true,
         id_status_pegawai: true,
-        id_jabatan_struktural: true
+        id_bagian: true,
+        foto: true
       },
-      include: {
-        simpeg_jabatan_struktural: true
+      orderBy: {
+        nama_pegawai: 'asc'
       }
     });
-    
-    // Ambil data provinsi, kabupaten, dan status pegawai
-    const pegawaiWithDetails = await Promise.all(pegawai.map(async (p) => {
-      const provinsi = await prisma.kol_provinsi.findUnique({
-        where: { id_prov: p.id_prov }
-      });
-      
-      const kabupaten = await prisma.kol_kabupaten.findUnique({
-        where: { id_kabupaten: p.id_kabupaten }
-      });
-      
-      const statusPegawai = await prisma.simpeg_status_pegawai.findFirst({
-        where: { id_status_pegawai: parseInt(p.id_status_pegawai) }
-      });
-      
-      return {
-        ...p,
-        provinsi: provinsi ? provinsi.nama_prov : null,
-        kabupaten: kabupaten ? kabupaten.nama_kabupaten : null,
-        status_pegawai: statusPegawai ? statusPegawai.nama_status_pegawai : null
-      };
-    }));
-    
-    res.json(pegawaiWithDetails);
+
+    res.json(pegawai);
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ 
-      message: 'Terjadi kesalahan saat mengambil data pegawai', 
-      error: error.message 
+    res.status(500).json({
+      message: 'Terjadi kesalahan saat mengambil data pegawai',
+      error: error.message
     });
   }
-}; // Added closing bracket and semicolon here
+};
 
 // Tambah pegawai baru (Admin)
-exports.createPegawai = async (req, res) => {
+export const createPegawai = async (req, res) => {
   try {
     const pegawaiData = req.body;
     
     // Validasi data
-    if (!pegawaiData.nama_pegawai || !pegawaiData.nip || !pegawaiData.no_ktp) {
-      return res.status(400).json({ message: 'Nama, NIP, dan NIK pegawai wajib diisi' });
+    if (!pegawaiData.nama_pegawai || !pegawaiData.nip || !pegawaiData.no_ktp || !pegawaiData.id_agama || !pegawaiData.id_riwayat_pangkat || !pegawaiData.id_riwayat_pendidikan) {
+      return res.status(400).json({ message: 'Nama, NIP, NIK, id_agama, id_riwayat_pangkat, dan id_riwayat_pendidikan wajib diisi' });
     }
     
+    // Cek apakah wilayah ada
+const existingWilayah = await prisma.kol_wilayah.findUnique({
+  where: { id_wil: pegawaiData.id_wil }
+});
+
+if (!existingWilayah) {
+  return res.status(400).json({ message: 'Wilayah tidak ditemukan' });
+}
+
+    // Cek apakah riwayat pangkat ada
+const existingRiwayatPangkat = await prisma.simpeg_riwayat_pangkat.findUnique({
+  where: { id_riwayat_pangkat: pegawaiData.id_riwayat_pangkat }
+});
+
+if (!existingRiwayatPangkat) {
+  return res.status(400).json({ message: 'Riwayat pangkat tidak ditemukan' });
+}
+
+// Cek apakah jurusan ada
+if (pegawaiData.id_jurusan) {
+  const existingJurusan = await prisma.kol_jurusan.findUnique({
+    where: { id_jurusan: pegawaiData.id_jurusan }
+  });
+
+  if (!existingJurusan) {
+    return res.status(400).json({ message: 'Jurusan tidak ditemukan' });
+  }
+}
+
+// Cek apakah prodi ada
+if (pegawaiData.id_prodi) {
+  const existingProdi = await prisma.kol_prodi.findUnique({
+    where: { id_prodi: pegawaiData.id_prodi }
+  });
+
+  if (!existingProdi) {
+    return res.status(400).json({ message: 'Prodi tidak ditemukan' });
+  }
+}
     // Cek apakah NIP sudah terdaftar
     const existingPegawai = await prisma.simpeg_pegawai.findFirst({
       where: { nip: pegawaiData.nip },
@@ -84,33 +113,56 @@ exports.createPegawai = async (req, res) => {
     // Password default bisa menggunakan 6 digit terakhir NIK atau NIP
     const defaultPassword = pegawaiData.no_ktp.slice(-6);
     
-    // Hapus field foto1 jika ada dalam data
-    if (pegawaiData.foto1) {
-      delete pegawaiData.foto1;
-    }
-    
     // Buat pegawai baru
-    const newPegawai = await prisma.simpeg_pegawai.create({
+    const Pegawai = await prisma.simpeg_pegawai.create({
       data: {
-        ...pegawaiData,
-        id_status_pegawai: pegawaiData.id_status_pegawai.toString() // Pastikan ini adalah string
-      }
+        nama_pegawai: pegawaiData.nama_pegawai,
+        jk: pegawaiData.jk,
+        tempat_lahir: pegawaiData.tempat_lahir,
+        tgl_lahir: pegawaiData.tgl_lahir ? new Date(pegawaiData.tgl_lahir) : undefined,
+        nidn: pegawaiData.nidn,
+        nip: pegawaiData.nip,
+        no_ktp: pegawaiData.no_ktp,
+        no_kk: pegawaiData.no_kk,
+        alamat: pegawaiData.alamat,
+        kota: pegawaiData.kota,
+        kode_pos: pegawaiData.kode_pos,
+        handphone: pegawaiData.handphone,
+        email_poliban: pegawaiData.email_poliban,
+        foto: pegawaiData.foto,
+
+        // Foreign keys
+        kol_agama: { connect: { id_agama: pegawaiData.id_agama } },
+        kol_darah: { connect: { id_darah: pegawaiData.gol_darah } },
+        kol_pendidikan: { connect: { id_pendidikan: pegawaiData.id_pendidikan } },
+        kol_status_hidup: pegawaiData.id_status_hidup ? { connect: { id_status_hidup: pegawaiData.id_status_hidup } } : undefined,
+        kol_wilayah: { connect: { id_wil: pegawaiData.id_wil } },
+        kol_kabupaten: { connect: { id_kabupaten: pegawaiData.id_kabupaten } },
+        kol_provinsi: { connect: { id_prov: pegawaiData.id_prov } },
+        simpeg_bagian: { connect: { id_bagian: pegawaiData.id_bagian } },
+        kol_jurusan: pegawaiData.id_jurusan ? { connect: { id_jurusan: pegawaiData.id_jurusan } } : undefined,
+        kol_prodi: pegawaiData.id_prodi ? { connect: { id_prodi: pegawaiData.id_prodi } } : undefined,
+        simpeg_jabatan_struktural: { connect: { id_jabatan_struktural: pegawaiData.id_jabatan_struktural } },
+        simpeg_jabatan_fungsional: { connect: { id_jabatan_fungsional: pegawaiData.id_jabatan_fungsional } },
+        simpeg_riwayat_pangkat: { connect: { id_riwayat_pangkat: pegawaiData.id_riwayat_pangkat } },
+        simpeg_riwayat_pendidikan: { connect: { id_riwayat_pendidikan: pegawaiData.id_riwayat_pendidikan } },
+        simpeg_status_pegawai: { connect: { id_status_pegawai: pegawaiData.id_status_pegawai } },
+      },
     });
-    
+
     // Cek apakah username sudah ada
     const existingUser = await prisma.users.findUnique({
       where: { username: pegawaiData.nip }
     });
     
-    
-    
+    let userAccount = null;
     if (!existingUser) {
       userAccount = await prisma.users.create({
         data: {
           username: pegawaiData.nip,
           password: defaultPassword, // Sebaiknya gunakan bcrypt untuk hash password
           nama_lengkap: pegawaiData.nama_pegawai,
-          email: pegawaiData.email || '',
+          email: pegawaiData.email_poliban,
           level: 2, // Level 2 untuk pegawai biasa
           aktif: 'Y',
           blokir: 'N'
@@ -120,7 +172,7 @@ exports.createPegawai = async (req, res) => {
     
     res.status(201).json({
       message: 'Pegawai berhasil ditambahkan' + (userAccount ? ' dan akun user dibuat' : ''),
-      data: newPegawai,
+      data: Pegawai,
       userAccount: userAccount ? {
         username: userAccount.username,
         password: defaultPassword, // Hanya untuk demo, jangan tampilkan password di produksi
@@ -129,50 +181,52 @@ exports.createPegawai = async (req, res) => {
     });
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ 
-      message: 'Terjadi kesalahan saat menambahkan pegawai', 
-      error: error.message 
+    res.status(500).json({
+      message: 'Terjadi kesalahan saat menambahkan pegawai',
+      error: error.message
     });
   }
 };
 
-// ... existing code ...
 // Ambil detail pegawai (Admin & Pegawai)
-exports.getPegawaiById = async (req, res) => {
+export const getPegawaiById = async (req, res) => {
   try {
     const { id } = req.params;
     
     const pegawai = await prisma.simpeg_pegawai.findUnique({
-      where: { id_pegawai: parseInt(id) }
+      where: { id_pegawai: parseInt(id) },
+      include: {
+        simpeg_riwayat_pangkat: true,
+        simpeg_riwayat_pendidikan: true,
+        kol_agama: true,
+        kol_darah: true,
+        kol_status_hidup: true,
+        kol_pendidikan: true,
+        kol_wilayah: true,
+        kol_kabupaten: true,
+        kol_provinsi: true,
+        simpeg_bagian: true,
+        kol_jurusan: true,
+        kol_prodi: true,
+        simpeg_jabatan_struktural: true,
+        simpeg_jabatan_fungsional: true
+      }
     });
     
     if (!pegawai) {
       return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
     }
     
-    // Ambil data tambahan
-    const provinsi = await prisma.kol_provinsi.findUnique({
-      where: { id_prov: pegawai.id_prov }
-    });
-    
-    const kabupaten = await prisma.kol_kabupaten.findUnique({
-      where: { id_kabupaten: pegawai.id_kabupaten }
-    });
-    
-    const statusPegawai = await prisma.simpeg_status_pegawai.findFirst({
-      where: { id_status_pegawai: parseInt(pegawai.id_status_pegawai) }
-    });
-    
-    const jabatanStruktural = await prisma.simpeg_jabatan_struktural.findUnique({
-      where: { id_jabatan_struktural: pegawai.id_jabatan_struktural }
-    });
-    
     const pegawaiDetail = {
       ...pegawai,
-      provinsi: provinsi ? provinsi.nama_prov : null,
-      kabupaten: kabupaten ? kabupaten.nama_kabupaten : null,
-      status_pegawai: statusPegawai ? statusPegawai.nama_status_pegawai : null,
-      jabatan: jabatanStruktural ? jabatanStruktural.nama_jabatan_struktural : null
+      gol_darah: darahMapping[pegawai.gol_darah],
+      id_pendidikan: pendidikanMapping[pegawai.id_pendidikan],
+      id_status_hidup: statusHidupMapping[pegawai.id_status_hidup],
+      id_jurusan: jurusanMapping[pegawai.id_jurusan],
+      jk: jkMapping[pegawai.jk],
+      kabupaten: kabupatenMapping[pegawai.id_kabupaten],
+      agama: agamaMapping[pegawai.id_agama],
+      wilayah: wilayahMapping[pegawai.id_wil],
     };
     
     res.json(pegawaiDetail);
@@ -185,17 +239,8 @@ exports.getPegawaiById = async (req, res) => {
   }
 };
 
-// Tambah pegawai baru (Admin)
-// Tambah pegawai baru (Admin)
-// ... existing code ...
-
-// Tambah pegawai baru (Admin)
-
-
-// ... existing code ...
-
 // Update pegawai (Admin)
-exports.updatePegawai = async (req, res) => {
+export const updatePegawai = async (req, res) => {
   try {
     const { id } = req.params;
     const pegawaiData = req.body;
@@ -260,7 +305,7 @@ exports.updatePegawai = async (req, res) => {
 };
 
 // Delete pegawai (Admin)
-exports.deletePegawai = async (req, res) => {
+export const deletePegawai = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -290,9 +335,8 @@ exports.deletePegawai = async (req, res) => {
   }
 };
 
-
 // Update data non-sensitif (Pegawai)
-exports.updateNonSensitiveData = async (req, res) => {
+export const updateNonSensitiveData = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -331,7 +375,7 @@ exports.updateNonSensitiveData = async (req, res) => {
 };
 
 // Request perubahan data sensitif (Pegawai)
-exports.requestSensitiveDataChange = async (req, res) => {
+export const requestSensitiveDataChange = async (req, res) => {
   try {
     const { id } = req.params;
     const { field, newValue, reason } = req.body;
@@ -377,39 +421,7 @@ exports.requestSensitiveDataChange = async (req, res) => {
 };
 
 // Mengelola permintaan perubahan data (Admin)
-// ... existing code ...
-// exports.getDataChangeRequestById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-
-//     const changeRequest = await prisma.data_change_requests.findUnique({
-//       where: { id: parseInt(id) },
-//       include: {
-//         simpeg_pegawai: { // Pastikan nama relasi benar
-//           select: {
-//             nama_pegawai: true,
-//             nip: true
-//           }
-//         }
-//       }
-//     });
-
-//     if (!changeRequest) {
-//       return res.status(404).json({ message: 'Permintaan perubahan data tidak ditemukan' });
-//     }
-
-//     res.json(changeRequest);
-//   } catch (error) {
-//     console.error('Error:', error);
-//     res.status(500).json({
-//       message: 'Terjadi kesalahan saat mengambil detail permintaan perubahan data',
-//       error: error.message
-//     });
-//   }
-// };
-// ... existing code ...
-
-exports.processDataChangeRequest = async (req, res) => {
+export const processDataChangeRequest = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, adminNotes } = req.body;
@@ -461,41 +473,49 @@ exports.processDataChangeRequest = async (req, res) => {
   }
 };
 
-
-
 // Mengambil semua permintaan perubahan data
-exports.getAllDataChangeRequests = async (req, res) => {
+export const getAllDataChangeRequests = async (req, res) => {
   try {
+    // Ambil semua permintaan perubahan data
     const requests = await prisma.data_change_requests.findMany({
-      include: {
-        simpeg_pegawai: true // relasi ke data pegawai
-      },
-      orderBy: { requested_at: 'desc' }
+      orderBy: {
+        // Tambahkan kriteria pengurutan jika diperlukan
+      }
     });
 
-    res.json(requests);
+    // Ambil data pegawai untuk setiap permintaan
+    const requestsWithPegawai = await Promise.all(requests.map(async (request) => {
+      if (request.pegawai_id) {
+        const pegawai = await prisma.simpeg_pegawai.findUnique({
+          where: { id_pegawai: request.pegawai_id },
+          select: {
+            nama_pegawai: true,
+            nip: true
+          }
+        });
+        return {
+          ...request,
+          pegawai
+        };
+      }
+      return request;
+    }));
+
+    res.json(requestsWithPegawai);
   } catch (err) {
     res.status(500).json({ error: 'Gagal mengambil data permintaan', detail: err.message });
   }
 };
 
-// Mengambil detail permintaan perubahan data berdasarkan ID
-
-exports.getDataChangeRequestById = async (req, res) => {
+// Mengambil detail permintaan perubahan data
+export const getDataChangeRequestById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Ambil detail permintaan perubahan data
     const changeRequest = await prisma.data_change_requests.findUnique({
       where: { 
         id: parseInt(id) 
-      },
-      include: {
-        pegawai: {
-          select: {
-            nama_pegawai: true,
-            nip: true
-          }
-        }
       }
     });
 
@@ -505,7 +525,19 @@ exports.getDataChangeRequestById = async (req, res) => {
       });
     }
 
-    res.json(changeRequest);
+    // Ambil data pegawai terkait
+    const pegawai = await prisma.simpeg_pegawai.findUnique({
+      where: { id_pegawai: changeRequest.pegawai_id },
+      select: {
+        nama_pegawai: true,
+        nip: true
+      }
+    });
+
+    res.json({
+      ...changeRequest,
+      pegawai
+    });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({
@@ -514,4 +546,11 @@ exports.getDataChangeRequestById = async (req, res) => {
     });
   }
 };
+// ... existing code ...
 
+export default {
+  getAllPegawai,
+  createPegawai,
+  getPegawaiById,
+  // Add other exports as needed
+};

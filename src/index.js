@@ -1,15 +1,23 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-const pegawaiRoutes = require('./routes/pegawai.routes');
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('../swagger.json');
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import authRoutes from './routes/authRoutes.js';
+import pegawaiRoutes from './routes/pegawai.routes.js';
+import absenRoutes from './routes/absenRoutes.js';
+// Ensure this path is correct and the file exists
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+
+// ... existing code ...
+
+// Baca file JSON secara manual
+const swaggerDocument = JSON.parse(fs.readFileSync(new URL('../swagger.json', import.meta.url), 'utf-8'));
+
+dotenv.config();
 
 // ... existing code ...
 
 const app = express();
-
 
 // Middleware
 app.use(cors());
@@ -21,6 +29,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/pegawai', pegawaiRoutes);
+app.use('/api/absen', absenRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {

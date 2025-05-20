@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
 // Middleware untuk verifikasi token
-exports.verifyToken = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -20,7 +20,7 @@ exports.verifyToken = (req, res, next) => {
 };
 
 // Middleware untuk memeriksa role admin pegawai
-exports.isAdminPegawai = (req, res, next) => {
+export const isAdminPegawai = (req, res, next) => {
   if (req.user.role !== 1) { // Asumsi role 1 adalah admin pegawai
     return res.status(403).json({ message: 'Akses ditolak. Hanya admin pegawai yang diizinkan.' });
   }
@@ -28,7 +28,7 @@ exports.isAdminPegawai = (req, res, next) => {
 };
 
 // Middleware untuk memeriksa role pegawai biasa
-exports.isPegawai = (req, res, next) => {
+export const isPegawai = (req, res, next) => {
   if (req.user.role !== 2) { // Asumsi role 2 adalah pegawai biasa
     return res.status(403).json({ message: 'Akses ditolak. Hanya pegawai yang diizinkan.' });
   }
@@ -36,7 +36,7 @@ exports.isPegawai = (req, res, next) => {
 };
 
 // Middleware untuk memeriksa apakah user adalah pemilik data
-exports.isOwner = (req, res, next) => {
+export const isOwner = (req, res, next) => {
   const pegawaiId = parseInt(req.params.id);
   
   if (req.user.role === 1) { // Admin bisa mengakses semua data

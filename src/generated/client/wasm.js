@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.7.0
- * Query Engine version: 3cff47a7f5d65c3ea74883f1d736e41d68ce91ed
+ * Prisma Client JS version: 6.8.2
+ * Query Engine version: 2060c79ba17c6bb9f5823312b6f6b7f4a845738e
  */
 Prisma.prismaVersion = {
-  client: "6.7.0",
-  engine: "3cff47a7f5d65c3ea74883f1d736e41d68ce91ed"
+  client: "6.8.2",
+  engine: "2060c79ba17c6bb9f5823312b6f6b7f4a845738e"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -120,6 +120,25 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.Aktivitas_kelasScalarFieldEnum = {
+  id_aktivitas_kelas: 'id_aktivitas_kelas',
+  judul_akt_kelas: 'judul_akt_kelas',
+  deskripsi_akt_kelas: 'deskripsi_akt_kelas'
+};
+
+exports.Prisma.Data_change_requestsScalarFieldEnum = {
+  id: 'id',
+  id_pegawai: 'id_pegawai',
+  field_name: 'field_name',
+  current_value: 'current_value',
+  requested_value: 'requested_value',
+  reason: 'reason',
+  status: 'status',
+  requested_at: 'requested_at',
+  processed_at: 'processed_at',
+  admin_notes: 'admin_notes'
+};
+
 exports.Prisma.Kol_agamaScalarFieldEnum = {
   id_agama: 'id_agama',
   nama_agama: 'nama_agama',
@@ -165,6 +184,11 @@ exports.Prisma.Kol_provinsiScalarFieldEnum = {
   nama_prov: 'nama_prov'
 };
 
+exports.Prisma.Kol_statusScalarFieldEnum = {
+  id_status: 'id_status',
+  nama_status: 'nama_status'
+};
+
 exports.Prisma.Kol_status_hidupScalarFieldEnum = {
   id_status_hidup: 'id_status_hidup',
   nama_status_hidup: 'nama_status_hidup'
@@ -177,27 +201,6 @@ exports.Prisma.Kol_wilayahScalarFieldEnum = {
   id_level_wil: 'id_level_wil'
 };
 
-exports.Prisma.Permintaan_perubahan_dataScalarFieldEnum = {
-  id_permintaan: 'id_permintaan',
-  id_pegawai: 'id_pegawai',
-  tanggal_permintaan: 'tanggal_permintaan',
-  status_permintaan: 'status_permintaan',
-  tanggal_persetujuan: 'tanggal_persetujuan',
-  id_admin: 'id_admin',
-  data_lama: 'data_lama',
-  data_baru: 'data_baru',
-  keterangan: 'keterangan'
-};
-
-exports.Prisma.Siap_dosenScalarFieldEnum = {
-  id_dosen: 'id_dosen',
-  id_kelas_mk: 'id_kelas_mk',
-  id_pegawai: 'id_pegawai',
-  no: 'no',
-  ket: 'ket',
-  pembagi: 'pembagi'
-};
-
 exports.Prisma.Simpeg_bagianScalarFieldEnum = {
   id_bagian: 'id_bagian',
   nama_bagian: 'nama_bagian'
@@ -208,16 +211,15 @@ exports.Prisma.Simpeg_jabatan_fungsionalScalarFieldEnum = {
   nama_jabatan_fungsional: 'nama_jabatan_fungsional'
 };
 
-exports.Prisma.Simpeg_jabatan_fungsional_kependidikanScalarFieldEnum = {
-  id_jabatan_fungsional: 'id_jabatan_fungsional',
-  nama_jabatan_fungsional: 'nama_jabatan_fungsional',
-  tingkat: 'tingkat'
-};
-
 exports.Prisma.Simpeg_jabatan_strukturalScalarFieldEnum = {
   id_jabatan_struktural: 'id_jabatan_struktural',
   id_jurusan: 'id_jurusan',
   nama_jabatan_struktural: 'nama_jabatan_struktural'
+};
+
+exports.Prisma.Simpeg_level_pendidikanScalarFieldEnum = {
+  id_level_pendidikan: 'id_level_pendidikan',
+  nama_level_pendidikan: 'nama_level_pendidikan'
 };
 
 exports.Prisma.Simpeg_pangkat_gol_ruangScalarFieldEnum = {
@@ -228,23 +230,16 @@ exports.Prisma.Simpeg_pangkat_gol_ruangScalarFieldEnum = {
 exports.Prisma.Simpeg_pegawaiScalarFieldEnum = {
   id_pegawai: 'id_pegawai',
   nama_pegawai: 'nama_pegawai',
-  panggilan: 'panggilan',
   jk: 'jk',
   id_agama: 'id_agama',
   tempat_lahir: 'tempat_lahir',
-  nama_ibu: 'nama_ibu',
   tgl_lahir: 'tgl_lahir',
   nidn: 'nidn',
   nip: 'nip',
   no_ktp: 'no_ktp',
   no_kk: 'no_kk',
-  no_serdos: 'no_serdos',
-  no_karpeg: 'no_karpeg',
   gol_darah: 'gol_darah',
-  tmt_cpns: 'tmt_cpns',
-  tmt_pns: 'tmt_pns',
   id_pendidikan: 'id_pendidikan',
-  tmt_pensiun: 'tmt_pensiun',
   id_status_hidup: 'id_status_hidup',
   alamat: 'alamat',
   kota: 'kota',
@@ -252,28 +247,50 @@ exports.Prisma.Simpeg_pegawaiScalarFieldEnum = {
   id_wil: 'id_wil',
   id_kabupaten: 'id_kabupaten',
   id_prov: 'id_prov',
-  telpon: 'telpon',
   handphone: 'handphone',
-  email: 'email',
   email_poliban: 'email_poliban',
-  website: 'website',
-  id_jabatan_fungsional: 'id_jabatan_fungsional',
   id_jabatan_struktural: 'id_jabatan_struktural',
+  id_jabatan_fungsional: 'id_jabatan_fungsional',
+  id_riwayat_pangkat: 'id_riwayat_pangkat',
+  id_riwayat_pendidikan: 'id_riwayat_pendidikan',
   id_status_pegawai: 'id_status_pegawai',
   id_jurusan: 'id_jurusan',
   id_bagian: 'id_bagian',
   id_prodi: 'id_prodi',
-  foto: 'foto',
-  foto_ktp: 'foto_ktp',
-  foto_npwp: 'foto_npwp',
-  foto_karpeg: 'foto_karpeg',
-  foto_surat_nikah: 'foto_surat_nikah',
-  foto_taspen: 'foto_taspen',
-  foto_nip: 'foto_nip',
-  status_update: 'status_update',
-  status_10_th: 'status_10_th',
-  status_20_th: 'status_20_th',
-  status_30_th: 'status_30_th'
+  foto: 'foto'
+};
+
+exports.Prisma.Simpeg_pendanaanScalarFieldEnum = {
+  id_pendanaan: 'id_pendanaan',
+  pendanaan: 'pendanaan'
+};
+
+exports.Prisma.Simpeg_riwayat_pangkatScalarFieldEnum = {
+  id_riwayat_pangkat: 'id_riwayat_pangkat',
+  id_pangkat_gol_ruang: 'id_pangkat_gol_ruang',
+  tmt_pangkat_gol_ruang: 'tmt_pangkat_gol_ruang',
+  no_sk: 'no_sk',
+  tgl_sk: 'tgl_sk',
+  pejabat_penetap: 'pejabat_penetap',
+  gambar1_pangkat: 'gambar1_pangkat',
+  gambar2_pangkat: 'gambar2_pangkat'
+};
+
+exports.Prisma.Simpeg_riwayat_pendidikanScalarFieldEnum = {
+  id_riwayat_pendidikan: 'id_riwayat_pendidikan',
+  id_level_pendidikan: 'id_level_pendidikan',
+  nama_pendidikan: 'nama_pendidikan',
+  total_sks: 'total_sks',
+  ipk: 'ipk',
+  fakultas_jurusan_prodi: 'fakultas_jurusan_prodi',
+  tempat: 'tempat',
+  nama_pimpinan: 'nama_pimpinan',
+  id_pendanaan: 'id_pendanaan',
+  id_status: 'id_status',
+  thn_masuk: 'thn_masuk',
+  thn_lulus: 'thn_lulus',
+  gambar1_pendidikan: 'gambar1_pendidikan',
+  gambar2_pendidikan: 'gambar2_pendidikan'
 };
 
 exports.Prisma.Simpeg_status_pegawaiScalarFieldEnum = {
@@ -300,19 +317,6 @@ exports.Prisma.UsersScalarFieldEnum = {
   ket: 'ket'
 };
 
-exports.Prisma.Data_change_requestsScalarFieldEnum = {
-  id: 'id',
-  pegawai_id: 'pegawai_id',
-  field_name: 'field_name',
-  current_value: 'current_value',
-  requested_value: 'requested_value',
-  reason: 'reason',
-  status: 'status',
-  requested_at: 'requested_at',
-  processed_at: 'processed_at',
-  admin_notes: 'admin_notes'
-};
-
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -321,6 +325,20 @@ exports.Prisma.SortOrder = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.aktivitas_kelasOrderByRelevanceFieldEnum = {
+  judul_akt_kelas: 'judul_akt_kelas',
+  deskripsi_akt_kelas: 'deskripsi_akt_kelas'
+};
+
+exports.Prisma.data_change_requestsOrderByRelevanceFieldEnum = {
+  field_name: 'field_name',
+  current_value: 'current_value',
+  requested_value: 'requested_value',
+  reason: 'reason',
+  status: 'status',
+  admin_notes: 'admin_notes'
 };
 
 exports.Prisma.kol_agamaOrderByRelevanceFieldEnum = {
@@ -347,7 +365,6 @@ exports.Prisma.kol_kabupatenOrderByRelevanceFieldEnum = {
 };
 
 exports.Prisma.kol_pendidikanOrderByRelevanceFieldEnum = {
-  id_pendidikan: 'id_pendidikan',
   nama_pendidikan: 'nama_pendidikan'
 };
 
@@ -361,8 +378,11 @@ exports.Prisma.kol_provinsiOrderByRelevanceFieldEnum = {
   nama_prov: 'nama_prov'
 };
 
+exports.Prisma.kol_statusOrderByRelevanceFieldEnum = {
+  nama_status: 'nama_status'
+};
+
 exports.Prisma.kol_status_hidupOrderByRelevanceFieldEnum = {
-  id_status_hidup: 'id_status_hidup',
   nama_status_hidup: 'nama_status_hidup'
 };
 
@@ -370,16 +390,6 @@ exports.Prisma.kol_wilayahOrderByRelevanceFieldEnum = {
   id_wil: 'id_wil',
   nm_wil: 'nm_wil',
   id_induk_wilayah: 'id_induk_wilayah'
-};
-
-exports.Prisma.permintaan_perubahan_dataOrderByRelevanceFieldEnum = {
-  data_lama: 'data_lama',
-  data_baru: 'data_baru',
-  keterangan: 'keterangan'
-};
-
-exports.Prisma.siap_dosenOrderByRelevanceFieldEnum = {
-  ket: 'ket'
 };
 
 exports.Prisma.simpeg_bagianOrderByRelevanceFieldEnum = {
@@ -390,13 +400,12 @@ exports.Prisma.simpeg_jabatan_fungsionalOrderByRelevanceFieldEnum = {
   nama_jabatan_fungsional: 'nama_jabatan_fungsional'
 };
 
-exports.Prisma.simpeg_jabatan_fungsional_kependidikanOrderByRelevanceFieldEnum = {
-  nama_jabatan_fungsional: 'nama_jabatan_fungsional',
-  tingkat: 'tingkat'
-};
-
 exports.Prisma.simpeg_jabatan_strukturalOrderByRelevanceFieldEnum = {
   nama_jabatan_struktural: 'nama_jabatan_struktural'
+};
+
+exports.Prisma.simpeg_level_pendidikanOrderByRelevanceFieldEnum = {
+  nama_level_pendidikan: 'nama_level_pendidikan'
 };
 
 exports.Prisma.simpeg_pangkat_gol_ruangOrderByRelevanceFieldEnum = {
@@ -405,37 +414,40 @@ exports.Prisma.simpeg_pangkat_gol_ruangOrderByRelevanceFieldEnum = {
 
 exports.Prisma.simpeg_pegawaiOrderByRelevanceFieldEnum = {
   nama_pegawai: 'nama_pegawai',
-  panggilan: 'panggilan',
-  jk: 'jk',
   tempat_lahir: 'tempat_lahir',
-  nama_ibu: 'nama_ibu',
   nidn: 'nidn',
   nip: 'nip',
   no_ktp: 'no_ktp',
   no_kk: 'no_kk',
-  no_serdos: 'no_serdos',
-  no_karpeg: 'no_karpeg',
-  gol_darah: 'gol_darah',
-  id_pendidikan: 'id_pendidikan',
-  id_status_hidup: 'id_status_hidup',
   alamat: 'alamat',
   kota: 'kota',
   kode_pos: 'kode_pos',
   id_wil: 'id_wil',
   id_kabupaten: 'id_kabupaten',
   id_prov: 'id_prov',
-  telpon: 'telpon',
   handphone: 'handphone',
-  email: 'email',
   email_poliban: 'email_poliban',
-  website: 'website',
-  foto: 'foto',
-  foto_ktp: 'foto_ktp',
-  foto_npwp: 'foto_npwp',
-  foto_karpeg: 'foto_karpeg',
-  foto_surat_nikah: 'foto_surat_nikah',
-  foto_taspen: 'foto_taspen',
-  foto_nip: 'foto_nip'
+  foto: 'foto'
+};
+
+exports.Prisma.simpeg_pendanaanOrderByRelevanceFieldEnum = {
+  pendanaan: 'pendanaan'
+};
+
+exports.Prisma.simpeg_riwayat_pangkatOrderByRelevanceFieldEnum = {
+  no_sk: 'no_sk',
+  pejabat_penetap: 'pejabat_penetap',
+  gambar1_pangkat: 'gambar1_pangkat',
+  gambar2_pangkat: 'gambar2_pangkat'
+};
+
+exports.Prisma.simpeg_riwayat_pendidikanOrderByRelevanceFieldEnum = {
+  nama_pendidikan: 'nama_pendidikan',
+  fakultas_jurusan_prodi: 'fakultas_jurusan_prodi',
+  tempat: 'tempat',
+  nama_pimpinan: 'nama_pimpinan',
+  gambar1_pendidikan: 'gambar1_pendidikan',
+  gambar2_pendidikan: 'gambar2_pendidikan'
 };
 
 exports.Prisma.simpeg_status_pegawaiOrderByRelevanceFieldEnum = {
@@ -455,21 +467,6 @@ exports.Prisma.usersOrderByRelevanceFieldEnum = {
   no_telp: 'no_telp',
   ket: 'ket'
 };
-
-exports.Prisma.data_change_requestsOrderByRelevanceFieldEnum = {
-  field_name: 'field_name',
-  current_value: 'current_value',
-  requested_value: 'requested_value',
-  reason: 'reason',
-  status: 'status',
-  admin_notes: 'admin_notes'
-};
-exports.permintaan_perubahan_data_status_permintaan = exports.$Enums.permintaan_perubahan_data_status_permintaan = {
-  pending: 'pending',
-  approved: 'approved',
-  rejected: 'rejected'
-};
-
 exports.users_aktif = exports.$Enums.users_aktif = {
   Y: 'Y',
   N: 'N'
@@ -481,6 +478,8 @@ exports.users_blokir = exports.$Enums.users_blokir = {
 };
 
 exports.Prisma.ModelName = {
+  aktivitas_kelas: 'aktivitas_kelas',
+  data_change_requests: 'data_change_requests',
   kol_agama: 'kol_agama',
   kol_darah: 'kol_darah',
   kol_jk: 'kol_jk',
@@ -489,20 +488,21 @@ exports.Prisma.ModelName = {
   kol_pendidikan: 'kol_pendidikan',
   kol_prodi: 'kol_prodi',
   kol_provinsi: 'kol_provinsi',
+  kol_status: 'kol_status',
   kol_status_hidup: 'kol_status_hidup',
   kol_wilayah: 'kol_wilayah',
-  permintaan_perubahan_data: 'permintaan_perubahan_data',
-  siap_dosen: 'siap_dosen',
   simpeg_bagian: 'simpeg_bagian',
   simpeg_jabatan_fungsional: 'simpeg_jabatan_fungsional',
-  simpeg_jabatan_fungsional_kependidikan: 'simpeg_jabatan_fungsional_kependidikan',
   simpeg_jabatan_struktural: 'simpeg_jabatan_struktural',
+  simpeg_level_pendidikan: 'simpeg_level_pendidikan',
   simpeg_pangkat_gol_ruang: 'simpeg_pangkat_gol_ruang',
   simpeg_pegawai: 'simpeg_pegawai',
+  simpeg_pendanaan: 'simpeg_pendanaan',
+  simpeg_riwayat_pangkat: 'simpeg_riwayat_pangkat',
+  simpeg_riwayat_pendidikan: 'simpeg_riwayat_pendidikan',
   simpeg_status_pegawai: 'simpeg_status_pegawai',
   user_level: 'user_level',
-  users: 'users',
-  data_change_requests: 'data_change_requests'
+  users: 'users'
 };
 
 /**

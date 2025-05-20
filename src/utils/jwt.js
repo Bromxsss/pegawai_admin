@@ -1,7 +1,9 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 // Generate JWT token
-exports.generateToken = (user) => {
+export const generateToken = (user) => {
   return jwt.sign(
     { 
       userId: user.id_user, 
@@ -14,6 +16,8 @@ exports.generateToken = (user) => {
 };
 
 // Verify JWT token
-exports.verifyToken = (token) => {
+export const verifyToken = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET);
 };
+
+export default prisma;
