@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-    output   = "/node_modules/@prisma/client"
+  output   = "/node_modules/@prisma/client"
 }
 
 datasource db {
@@ -176,7 +176,7 @@ model simpeg_pegawai {
   id_jurusan                Int?
   id_bagian                 Int                       @db.TinyInt
   id_prodi                  Int?
-  foto                      String?                   @default("blm_ada_foto.jpg") @db.VarChar(25)
+  foto                      String?                   @default("blm_ada_foto.jpg") @db.VarChar(255)
   data_change_requests      data_change_requests[]
   simpeg_riwayat_pangkat    simpeg_riwayat_pangkat    @relation(fields: [id_riwayat_pangkat], references: [id_riwayat_pangkat], onDelete: Cascade, map: "simpeg_pegawai_ibfk_13")
   simpeg_status_pegawai     simpeg_status_pegawai     @relation(fields: [id_status_pegawai], references: [id_status_pegawai], onDelete: Cascade, map: "simpeg_pegawai_ibfk_14")

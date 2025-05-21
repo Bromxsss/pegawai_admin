@@ -275,6 +275,21 @@ const darahMapping = {
     "021019": "Kec. Ganeas",
     // Tambahkan mapping lainnya sesuai kebutuhan
   };
+
+  // mappings.js
+export const jabatanStrukturalMapping = {
+    1: 'Manager',
+    2: 'Supervisor',
+    // tambahkan mapping lainnya
+  };
+  
+  export const jabatanFungsionalMapping = {
+    1: 'Dosen',
+    2: 'Peneliti',
+    // tambahkan mapping lainnya
+  };
+  
+  // Tambahkan mapping lainnya sesuai kebutuhan
   
   export {
     darahMapping,

@@ -7,8 +7,13 @@ import absenRoutes from './routes/absenRoutes.js';
 // Ensure this path is correct and the file exists
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
+import path from 'path'
+import { fileURLToPath } from 'url';
 
 // ... existing code ...
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Baca file JSON secara manual
 const swaggerDocument = JSON.parse(fs.readFileSync(new URL('../swagger.json', import.meta.url), 'utf-8'));
@@ -22,6 +27,11 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+// Middleware untuk mem-parsing JSON dan URL-encoded
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Swagger UI
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
