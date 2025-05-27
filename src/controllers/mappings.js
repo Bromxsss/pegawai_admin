@@ -1,11 +1,11 @@
 // Mapping dari id ke deskripsi
 const darahMapping = {
-    1: "A",
-    2: "B",
-    3: "AB",
-    4: "O",
-    5: "DUMMY"
-  };
+  'A': 'A',
+  'B': 'B',
+  'O': 'O',
+  'AB': 'AB'
+};
+
   
   const pendidikanMapping = {
     1: "SD",

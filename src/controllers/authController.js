@@ -11,7 +11,9 @@ const login = async (req, res) => {
     
     // Cari user berdasarkan username
     const user = await prisma.users.findUnique({
-      where: { username }
+      where: { 
+        username: req.body.username.padEnd(35, ' ') // cocokkan dengan CHAR(35)
+       }
     });
     
     console.log('User found:', user);
@@ -87,8 +89,8 @@ const login = async (req, res) => {
           email_poliban: true,
           id_jabatan_struktural: true,
           id_jabatan_fungsional: true,
-          id_riwayat_pangkat: true,
-          id_riwayat_pendidikan: true,
+          // id_riwayat_pangkat: true,
+          // id_riwayat_pendidikan: true,
           id_status_pegawai: true,
           id_jurusan: true,
           id_bagian: true,
