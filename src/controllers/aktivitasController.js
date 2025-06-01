@@ -12,3 +12,5 @@ exports.createAktivitas = async (req, res) => {
   });
   res.json(data);
 };
+
+

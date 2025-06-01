@@ -135,7 +135,7 @@ if (pegawaiData) {
       { 
         userId: user.id_user, 
         role: user.level,
-        pegawaiId: pegawaiData ? pegawaiData.id_pegawai : true,
+        id_pegawai: pegawaiData ? pegawaiData.id_pegawai : true,
       },
       process.env.JWT_SECRET || 'rahasia',
       { expiresIn: '1d' }
@@ -147,7 +147,9 @@ if (pegawaiData) {
       welcomeMessage = 'Selamat login sebagai Admin Pegawai';
     } else if (user.level === 2) {
       welcomeMessage = 'Selamat Anda login sebagai Pegawai';
+      
     }
+
     
     // Kirim response dengan data yang diminta
     res.json({

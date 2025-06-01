@@ -4,6 +4,7 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import pegawaiRoutes from './routes/pegawai.routes.js';
 import absenRoutes from './routes/absenRoutes.js';
+import pegawaiBiasaRoutes from './routes/pegawaiBiasaRoutes.js';
 // Ensure this path is correct and the file exists
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
@@ -39,6 +40,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/pegawai', pegawaiRoutes);
+app.use('/api/pegawai', pegawaiBiasaRoutes);
 app.use('/api/absen', absenRoutes);
 
 // Error handler

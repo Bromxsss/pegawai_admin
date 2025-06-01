@@ -1,4 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -8,7 +9,7 @@ async function main() {
     update: {},
     create: {
       username: 'admin',
-      password: 'admin123', // Sebaiknya gunakan password yang kuat dan di-hash
+      password: 'admin123', // Sebaiknya hash password di aplikasi nyata
       level: 1, // Sesuaikan dengan level admin di tabel user_level
       nama_lengkap: 'Administrator',
       email: 'admin@example.com',
@@ -23,8 +24,8 @@ async function main() {
     update: {},
     create: {
       username: 'pegawai1',
-      password: 'pegawai123', // Sebaiknya gunakan password yang kuat dan di-hash
-      level: 2, // Sesuaikan dengan level pegawai di tabel user_level
+      password: 'pegawai123',
+      level: 2,
       nama_lengkap: 'Pegawai Satu',
       email: 'pegawai1@example.com',
       aktif: 'Y',

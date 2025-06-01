@@ -15,19 +15,26 @@ import {
   processDataChangeRequest,
   upload
 } from '../controllers/pegawai.controller.js';
-import { verifyToken, isAdminPegawai } from '../middlewares/auth.js';
+import { verifyToken, isAdminPegawai} from '../middlewares/auth.js';
 // import upload from '../middleware/uploadMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const router = express.Router();
 
+
+
+
 // Routes untuk Admin (CRUD penuh)
 router.post('/', verifyToken, isAdminPegawai, upload.single('foto'), createPegawai);
 router.get('/', verifyToken, isAdminPegawai, getAllPegawai);
 router.get('/:id', verifyToken, isAdminPegawai, getPegawaiById);
-router.put('/:id', verifyToken, isAdminPegawai, updatePegawai);
+router.put('/:id', verifyToken, isAdminPegawai, upload.single('foto'), updatePegawai);
 router.delete('/:id', verifyToken, isAdminPegawai, deletePegawai);
+
+
+
+
 
 // Routes untuk Pegawai (update data sensitif dan non-sensitif)
 router.put('/profile/non-sensitive/:id', verifyToken, updateNonSensitiveData);
@@ -37,6 +44,10 @@ router.post('/profile/request-sensitive/:id', verifyToken, requestSensitiveDataC
 router.get('/admin/change-requests', verifyToken, isAdminPegawai, getAllDataChangeRequests);
 router.get('/admin/change-requests/:id', verifyToken, isAdminPegawai, getDataChangeRequestById);
 router.put('/admin/change-requests/:id', verifyToken, isAdminPegawai, processDataChangeRequest);
+
+
+
+
 
 // Endpoint untuk mendapatkan foto pegawai
 // ... existing code ...
@@ -56,16 +67,13 @@ router.get('/foto/:filename', verifyToken, isAdminPegawai, (req, res) => {
   });
 });
 
+
+
+
 // Tambahkan rute untuk mengedit foto
 // Rute untuk mengedit foto
-router.put('/foto/:filename', verifyToken, (req, res) => {
-  const { filename } = req.params;
-  const filePath = path.join(__dirname, '../controllers/uploads', filename);
-  // Logika untuk mengedit foto
-  console.log('Mengedit file:', filePath);
-  // Implementasi penggantian file
-  res.status(200).json({ message: 'Foto berhasil diperbarui' });
-});
+
+
 
 // Rute untuk menghapus foto
 router.delete('/foto/:filename', verifyToken, (req, res) => {

@@ -27,6 +27,7 @@ export const isAdminPegawai = (req, res, next) => {
   next();
 };
 
+
 // Middleware untuk memeriksa role pegawai biasa
 export const isPegawai = (req, res, next) => {
   if (req.user.role !== 2) { // Asumsi role 2 adalah pegawai biasa
@@ -37,13 +38,17 @@ export const isPegawai = (req, res, next) => {
 
 // Middleware untuk memeriksa apakah user adalah pemilik data
 export const isOwner = (req, res, next) => {
-  const pegawaiId = parseInt(req.params.id);
-  
-  if (req.user.role === 1) { // Admin bisa mengakses semua data
-    next();
-  } else if (req.user.pegawaiId === pegawaiId) { // Pegawai hanya bisa akses datanya sendiri
-    next();
-  } else {
-    return res.status(403).json({ message: 'Akses ditolak. Anda tidak memiliki izin untuk data ini.' });
+  const pegawaiId = parseInt(req.params.id_pegawai);
+
+  if (req.user.role === 1) {
+    // Admin boleh akses semua data
+    return next();
   }
+
+  if (req.user.id_pegawai === pegawaiId) {
+    // Pegawai boleh akses data miliknya sendiri
+    return next();
+  }
+
+  return res.status(403).json({ message: 'Akses ditolak. Anda tidak memiliki izin untuk data ini.' });
 };

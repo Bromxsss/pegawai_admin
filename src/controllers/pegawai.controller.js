@@ -60,6 +60,7 @@ export const getAllPegawai = async (req, res) => {
           select: {
             // field biasa
             id_riwayat_pangkat: true,
+            
             // ...
             // relasi nested
             simpeg_pangkat_gol_ruang: {
@@ -88,7 +89,7 @@ export const getAllPegawai = async (req, res) => {
         }
       }
     });
-
+ 
     res.json(pegawai);
   } catch (error) {
     console.error('Error:', error);
@@ -100,6 +101,9 @@ export const getAllPegawai = async (req, res) => {
 };
 
 
+
+
+
 // Tambah pegawai baru (Admin)
 // Tambah pegawai baru (Admin)
 export const createPegawai = async (req, res) => {
@@ -107,6 +111,7 @@ export const createPegawai = async (req, res) => {
     console.log('Data yang diterima:', req.body);
     const pegawaiData = req.body;
     const foto = req.file ? req.file.filename : null;
+    pegawaiData.foto = foto;
 
    // Validasi panjang NIP
    if (pegawaiData.nip.length < 18) {
@@ -292,6 +297,10 @@ export const createPegawai = async (req, res) => {
   }
 };
 
+
+
+
+
 // Ambil detail pegawai (Admin & Pegawai)
 // ... existing code ...
 
@@ -358,7 +367,14 @@ export const getPegawaiById = async (req, res) => {
 export const updatePegawai = async (req, res) => {
   try {
     const { id } = req.params;
-    let pegawaiData = req.body;
+    let pegawaiData = req.body || {};
+
+    // Validasi awal
+    if (!pegawaiData || typeof pegawaiData !== 'object' || Array.isArray(pegawaiData)) {
+      return res.status(400).json({ message: 'Data update tidak valid' });
+    }
+
+    
 
     // Cek apakah pegawai ada
     const existingPegawai = await prisma.simpeg_pegawai.findUnique({
@@ -369,20 +385,38 @@ export const updatePegawai = async (req, res) => {
       return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
     }
 
+    // === [UPLOAD FOTO BARU] ===
+    if (req.file) {
+      const oldFoto = existingPegawai.foto;
+      const newFoto = req.file.filename;
+
+      // Hapus foto lama dari folder uploads (jika ada)
+      if (oldFoto) {
+        const oldPath = path.join('uploads', oldFoto);
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      }
+
+      // Simpan path/filename baru ke database
+      pegawaiData.foto = newFoto;
+    }
+
     // Field yang bertipe INT (pastikan sesuai dengan schema.prisma kamu)
+    // Perbaikan: gunakan field yang konsisten dengan schema dan data frontend
     const intFields = [
-      'id_status_pegawai', 'id_agama', 'id_jk',
+      'id_status_pegawai', 'id_agama', 'jk',
       'id_jabatan_struktural', 'id_jabatan_fungsional',
-      'id_bagian', 'id_jurusan', 'id_prodi', 'id_darah',
+      'id_bagian', 'id_jurusan', 'id_prodi', 'gol_darah',
       'id_riwayat_pangkat', 'id_riwayat_pendidikan'
     ];
 
     intFields.forEach(field => {
-      if (pegawaiData[field] !== undefined && pegawaiData[field] !== null) {
+      if (Object.prototype.hasOwnProperty.call(pegawaiData, field) && pegawaiData[field] !== null && pegawaiData[field] !== '') {
         pegawaiData[field] = parseInt(pegawaiData[field]);
+        if (isNaN(pegawaiData[field])) delete pegawaiData[field];
       }
     });
-  
 
     // Field yang harus string (seperti kode wilayah & kabupaten)
     const stringFields = [
@@ -391,13 +425,7 @@ export const updatePegawai = async (req, res) => {
     ];
 
     stringFields.forEach(field => {
-      if (pegawaiData[field] !== undefined && pegawaiData[field] !== null) {
-        pegawaiData[field] = String(pegawaiData[field]);
-      }
-    });
-
-    stringFields.forEach(field => {
-      if (pegawaiData[field] !== undefined && pegawaiData[field] !== null) {
+      if (Object.prototype.hasOwnProperty.call(pegawaiData, field) && pegawaiData[field] !== null && pegawaiData[field] !== '') {
         pegawaiData[field] = String(pegawaiData[field]);
       }
     });
@@ -405,7 +433,7 @@ export const updatePegawai = async (req, res) => {
     // Validasi dan parsing tgl_lahir
     if (pegawaiData.tgl_lahir) {
       const date = new Date(pegawaiData.tgl_lahir);
-      if (!isNaN(date)) {
+      if (!isNaN(date.getTime())) {
         pegawaiData.tgl_lahir = date;
       } else {
         delete pegawaiData.tgl_lahir;
