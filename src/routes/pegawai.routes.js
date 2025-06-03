@@ -8,14 +8,14 @@ import {
   getPegawaiById,
   updatePegawai,
   deletePegawai,
-  updateNonSensitiveData,
+  // updateNonSensitiveData,
   requestSensitiveDataChange,
   getAllDataChangeRequests,
   getDataChangeRequestById,
   processDataChangeRequest,
   upload
 } from '../controllers/pegawai.controller.js';
-import { verifyToken, isAdminPegawai} from '../middlewares/auth.js';
+import { verifyToken, isAdminPegawai, isOwner} from '../middlewares/auth.js';
 // import upload from '../middleware/uploadMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,8 +37,8 @@ router.delete('/:id', verifyToken, isAdminPegawai, deletePegawai);
 
 
 // Routes untuk Pegawai (update data sensitif dan non-sensitif)
-router.put('/profile/non-sensitive/:id', verifyToken, updateNonSensitiveData);
-router.post('/profile/request-sensitive/:id', verifyToken, requestSensitiveDataChange);
+// router.put('/profile/non-sensitive/:id', verifyToken, isOwner, upload.single('foto'), updateNonSensitiveData);
+//router.post('/profile/request-sensitive/:id', verifyToken, requestSensitiveDataChange);
 
 // Routes untuk Admin (mengelola permintaan perubahan data)
 router.get('/admin/change-requests', verifyToken, isAdminPegawai, getAllDataChangeRequests);
@@ -51,7 +51,7 @@ router.put('/admin/change-requests/:id', verifyToken, isAdminPegawai, processDat
 
 // Endpoint untuk mendapatkan foto pegawai
 // ... existing code ...
-router.get('/foto/:filename', verifyToken, isAdminPegawai, (req, res) => {
+router.get('/foto-pegawai/:filename', verifyToken, isAdminPegawai, (req, res) => {
   const { filename } = req.params;
   const filePath = path.join(__dirname, '../controllers/uploads', filename);
    // Sesuaikan jalur ke lokasi yang benar
@@ -76,7 +76,7 @@ router.get('/foto/:filename', verifyToken, isAdminPegawai, (req, res) => {
 
 
 // Rute untuk menghapus foto
-router.delete('/foto/:filename', verifyToken, (req, res) => {
+router.delete('/foto-pegawai/:filename', verifyToken, isAdminPegawai, (req, res) => {
   const { filename } = req.params;
   const filePath = path.join(__dirname, '../controllers/uploads', filename);
   // Logika untuk menghapus foto

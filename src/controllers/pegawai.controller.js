@@ -519,44 +519,75 @@ export const deletePegawai = async (req, res) => {
   }
 };
 
+
+
+// PINDAH KE pegawaiBiasController.js
 // Update data non-sensitif (Pegawai)
-export const updateNonSensitiveData = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
+// filepath: [pegawai.controller.js](http://_vscodecontentref_/12)
+// export const updateNonSensitiveData = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const updateData = req.body || {};
 
-    // Validasi input
-    if (!updateData) {
-      return res.status(400).json({ message: 'Data untuk update harus disediakan' });
-    }
+//     // Daftar field yang boleh diupdate oleh pegawai sendiri
+//     const allowedFields = [
+//       'nama_pegawai',
+//       'jk',
+//       'tempat_lahir',
+//       'tgl_lahir',
+//       'alamat',
+//       'kota',
+//       'kode_pos',
+//       'handphone',
+//       'email_poliban',
+//       'foto'
+//     ];
 
-    // Cek apakah pegawai ada
-    const pegawai = await prisma.simpeg_pegawai.findUnique({
-      where: { id_pegawai: parseInt(id) }
-    });
+//     // Filter hanya field yang diizinkan
+//     const filteredData = {};
+//     for (const key of allowedFields) {
+//       if (Object.prototype.hasOwnProperty.call(updateData, key)) {
+//         filteredData[key] = updateData[key];
+//       }
+//     }
 
-    if (!pegawai) {
-      return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
-    }
+//     // Jika ada upload file foto, tambahkan ke filteredData
+//     if (req.file) {
+//       filteredData.foto = req.file.filename;
+//     }
 
-    // Update data non-sensitif
-    const updatedPegawai = await prisma.simpeg_pegawai.update({
-      where: { id_pegawai: parseInt(id) },
-      data: updateData
-    });
+//     if (Object.keys(filteredData).length === 0) {
+//       return res.status(400).json({ message: 'Tidak ada data yang boleh diupdate' });
+//     }
 
-    res.json({
-      message: 'Data non-sensitif berhasil diperbarui',
-      data: updatedPegawai
-    });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({
-      message: 'Terjadi kesalahan saat memperbarui data non-sensitif',
-      error: error.message
-    });
-  }
-};
+//     // Cek apakah pegawai ada
+//     const pegawai = await prisma.simpeg_pegawai.findUnique({
+//       where: { id_pegawai: parseInt(id) }
+//     });
+
+//     if (!pegawai) {
+//       return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
+//     }
+
+//     // Update data non-sensitif
+//     const updatedPegawai = await prisma.simpeg_pegawai.update({
+//       where: { id_pegawai: parseInt(id) },
+//       data: filteredData
+//     });
+
+//     res.json({
+//       message: 'Data non-sensitif berhasil diperbarui',
+//       data: updatedPegawai
+//     });
+//   } catch (error) {
+//     console.error('Error:', error);
+//     res.status(500).json({
+//       message: 'Terjadi kesalahan saat memperbarui data non-sensitif',
+//       error: error.message
+//     });
+//   }
+// };
+
 
 
 export const requestSensitiveDataChange = async (req, res) => {

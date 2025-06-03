@@ -159,8 +159,6 @@ model simpeg_level_pendidikan {
 model simpeg_pangkat_gol_ruang {
   id_pangkat_gol_ruang   Int    @id @default(autoincrement())
   nama_pangkat_gol_ruang String @db.VarChar(50)
-
-  simpeg_riwayat_pangkat   simpeg_riwayat_pangkat[]
 }
 
 model simpeg_pegawai {
@@ -172,6 +170,7 @@ model simpeg_pegawai {
   tgl_lahir                 DateTime?                   @db.Date
   nidn                      String                      @db.Char(10)
   nip                       String                      @db.Char(18)
+  NUPTK                     String?                     @db.VarChar(20)
   no_ktp                    String                      @db.Char(16)
   no_kk                     String                      @db.Char(16)
   gol_darah                 Int                         @db.SmallInt
@@ -224,6 +223,7 @@ model simpeg_pegawai {
   @@index([id_status_pegawai], map: "id_status_pegawai")
   @@index([id_wil], map: "id_wil")
   @@index([jk], map: "jk")
+  @@index([nip], map: "nip")
 }
 
 model simpeg_pendanaan {
@@ -241,8 +241,6 @@ model simpeg_riwayat_pangkat {
   tgl_sk                DateTime?      @db.Date
   pejabat_penetap       String         @db.VarChar(50)
   simpeg_pegawai        simpeg_pegawai @relation(fields: [id_pegawai], references: [id_pegawai], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_riwayat_pangkat_ibfk_3")
-  simpeg_pangkat_gol_ruang simpeg_pangkat_gol_ruang @relation(fields: [id_pangkat_gol_ruang], references: [id_pangkat_gol_ruang])
-
 
   @@index([id_pangkat_gol_ruang], map: "id_pangkat_gol_ruang")
   @@index([id_pegawai], map: "id_pegawai")

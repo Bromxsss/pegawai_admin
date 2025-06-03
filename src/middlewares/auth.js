@@ -38,7 +38,7 @@ export const isPegawai = (req, res, next) => {
 
 // Middleware untuk memeriksa apakah user adalah pemilik data
 export const isOwner = (req, res, next) => {
-  const pegawaiId = parseInt(req.params.id_pegawai);
+  const pegawaiId = parseInt(req.params.id_pegawai || req.params.id);
 
   if (req.user.role === 1) {
     // Admin boleh akses semua data
