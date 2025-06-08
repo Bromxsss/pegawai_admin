@@ -113,12 +113,20 @@ export const createPegawai = async (req, res) => {
     const foto = req.file ? req.file.filename : null;
     pegawaiData.foto = foto;
 
-   // Validasi panjang NIP
-   if (pegawaiData.nip.length < 18) {
-    return res.status(400).json({ message: 'NIP harus tepat 18 karakter, saat ini kurang dari 18 karakter' });
-  } else if (pegawaiData.nip.length > 18) {
-    return res.status(400).json({ message: 'NIP harus tepat 18 karakter, saat ini lebih dari 18 karakter' });
+    // Validasi panjang NIP
+    if (pegawaiData.nip.length < 18) {
+      return res.status(400).json({ message: 'NIP harus tepat 18 karakter, saat ini kurang dari 18 karakter' });
+    } else if (pegawaiData.nip.length > 18) {
+      return res.status(400).json({ message: 'NIP harus tepat 18 karakter, saat ini lebih dari 18 karakter' });
+    }
+
+    let tglLahirValue = null;
+if (pegawaiData.tgl_lahir) {
+  const date = new Date(pegawaiData.tgl_lahir);
+  if (!isNaN(date.getTime())) {
+    tglLahirValue = date;
   }
+}
 
     // Konversi ID dari String ke Int
     pegawaiData.jk = parseInt(pegawaiData.jk);
@@ -126,80 +134,90 @@ export const createPegawai = async (req, res) => {
     pegawaiData.gol_darah = parseInt(pegawaiData.gol_darah);
     pegawaiData.id_pendidikan = parseInt(pegawaiData.id_pendidikan);
     pegawaiData.id_riwayat_pangkat = parseInt(pegawaiData.id_riwayat_pangkat);
-    pegawaiData.id_pendidikan = pegawaiData.id_pendidikan.toString(); // ✅
+    pegawaiData.id_pendidikan = parseInt(pegawaiData.id_pendidikan);
+    if (pegawaiData.id_pendidikan !== undefined && pegawaiData.id_pendidikan !== null && !isNaN(pegawaiData.id_pendidikan)) {
+    pegawaiData.id_pendidikan = pegawaiData.id_pendidikan.toString();
+}
 
     pegawaiData.id_status_pegawai = parseInt(pegawaiData.id_status_pegawai);
     pegawaiData.id_status_hidup = parseInt(pegawaiData.id_status_hidup); // Konversi ke Int
-    pegawaiData.id_wil = pegawaiData.id_wil.toString(); // Pastikan ini adalah String
-    pegawaiData.id_kabupaten = pegawaiData.id_kabupaten.toString();
-    pegawaiData.id_prov = pegawaiData.id_prov.toString();
+
+    pegawaiData.id_wil = parseInt(pegawaiData.id_wil);
+    if (pegawaiData.id_wil !== undefined && pegawaiData.id_wil !== null && !isNaN(pegawaiData.id_wil)) {
+      pegawaiData.id_wil = pegawaiData.id_wil.toString();
+    }
+
+    pegawaiData.id_kabupaten = parseInt(pegawaiData.id_kabupaten);
+    if (pegawaiData.id_kabupaten !== undefined && pegawaiData.id_kabupaten !== null && !isNaN(pegawaiData.id_kabupaten)) {  
+      pegawaiData.id_kabupaten = pegawaiData.id_kabupaten.toString();
+    }
+
+    pegawaiData.id_prov = parseInt(pegawaiData.id_prov);
+    if (pegawaiData.id_prov !== undefined && pegawaiData.id_prov !== null && !isNaN(pegawaiData.id_prov)) { 
+      pegawaiData.id_prov = pegawaiData.id_prov.toString();
+    }
+
     pegawaiData.id_bagian = parseInt(pegawaiData.id_bagian);
     pegawaiData.id_jurusan = parseInt(pegawaiData.id_jurusan);
     pegawaiData.id_prodi = parseInt(pegawaiData.id_prodi);
     pegawaiData.id_jabatan_struktural = parseInt(pegawaiData.id_jabatan_struktural);
     pegawaiData.id_jabatan_fungsional = parseInt(pegawaiData.id_jabatan_fungsional);
 
-    // Validasi data
-    if (!pegawaiData || !pegawaiData.nama_pegawai || !pegawaiData.nip || !pegawaiData.no_ktp || !pegawaiData.id_agama || !pegawaiData.id_wil) {
-      return res.status(400).json({ message: 'Nama, NIP, NIK, id_agama, dan id_wil wajib diisi' });
-    }
-
-    // Cek apakah wilayah ada
-    const existingWilayah = await prisma.kol_wilayah.findUnique({
-      where: { id_wil: pegawaiData.id_wil }
-    });
-
-    if (!existingWilayah) {
-      return res.status(400).json({ message: 'Wilayah tidak ditemukan' });
-    }
-
-    // Cek apakah jurusan ada
-    if (pegawaiData.id_jurusan) {
-      const existingJurusan = await prisma.kol_jurusan.findUnique({
-        where: { id_jurusan: pegawaiData.id_jurusan }
+    if (
+      !pegawaiData ||
+      !pegawaiData.nama_pegawai ||
+      !pegawaiData.nip ||
+      !pegawaiData.nidn ||
+      !pegawaiData.NUPTK ||
+      !pegawaiData.id_jabatan_struktural ||
+      !pegawaiData.id_jabatan_fungsional ||
+      !pegawaiData.id_bagian ||
+      !pegawaiData.id_jurusan ||
+      !pegawaiData.id_prodi ||
+      !pegawaiData.id_status_hidup ||
+      !pegawaiData.id_status_pegawai
+    ) {
+      return res.status(400).json({
+        message: 'Field wajib: nama_pegawai, nip, nidn, NUPTK, id_jabatan_struktural, id_jabatan_fungsional, id_bagian, id_jurusan, id_prodi, id_status_hidup, id_status_pegawai'
       });
-
-      if (!existingJurusan) {
-        return res.status(400).json({ message: 'Jurusan tidak ditemukan' });
-      }
     }
 
-    // Cek apakah prodi ada
-    if (pegawaiData.id_prodi) {
-      const existingProdi = await prisma.kol_prodi.findUnique({
-        where: { id_prodi: pegawaiData.id_prodi }
-      });
+    // Validasi relasi-relasi penting
+    const [existingJabatanStruktural, existingJabatanFungsional, existingBagian, existingJurusan, existingProdi] = await Promise.all([
+      prisma.simpeg_jabatan_struktural.findUnique({ where: { id_jabatan_struktural: pegawaiData.id_jabatan_struktural } }),
+      prisma.simpeg_jabatan_fungsional.findUnique({ where: { id_jabatan_fungsional: pegawaiData.id_jabatan_fungsional } }),
+      prisma.simpeg_bagian.findUnique({ where: { id_bagian: pegawaiData.id_bagian } }),
+      prisma.kol_jurusan.findUnique({ where: { id_jurusan: pegawaiData.id_jurusan } }),
+      prisma.kol_prodi.findUnique({ where: { id_prodi: pegawaiData.id_prodi } }),
+    ]);
 
-      if (!existingProdi) {
-        return res.status(400).json({ message: 'Prodi tidak ditemukan' });
-      }
-    }
+    if (!existingJabatanStruktural) return res.status(400).json({ message: 'Jabatan Struktural tidak ditemukan' });
+    if (!existingJabatanFungsional) return res.status(400).json({ message: 'Jabatan Fungsional tidak ditemukan' });
+    if (!existingBagian) return res.status(400).json({ message: 'Bagian tidak ditemukan' });
+    if (!existingJurusan) return res.status(400).json({ message: 'Jurusan tidak ditemukan' });
+    if (!existingProdi) return res.status(400).json({ message: 'Prodi tidak ditemukan' });
 
     // Cek apakah NIP sudah terdaftar
     const existingPegawai = await prisma.simpeg_pegawai.findFirst({
       where: { nip: pegawaiData.nip },
-      select: {
-        id_pegawai: true,
-        nip: true,
-        nama_pegawai: true
-      }
+      select: { id_pegawai: true, nip: true, nama_pegawai: true }
     });
-
     if (existingPegawai) {
       return res.status(400).json({ message: 'NIP sudah terdaftar' });
     }
 
-    // Password default bisa menggunakan 6 digit terakhir NIK atau NIP
-    const defaultPassword = pegawaiData.no_ktp.slice(-6);
+    // Gunakan 6 digit terakhir dari no_ktp untuk password default
+    const defaultPassword = pegawaiData.nip.slice(-6);
 
     // Buat pegawai baru
     const Pegawai = await prisma.simpeg_pegawai.create({
-       data :  {
+      data: {
         nama_pegawai: pegawaiData.nama_pegawai,
         tempat_lahir: pegawaiData.tempat_lahir,
-        tgl_lahir: new Date(pegawaiData.tgl_lahir),
+        tgl_lahir: tglLahirValue,
         nidn: pegawaiData.nidn,
         nip: pegawaiData.nip,
+        NUPTK: pegawaiData.NUPTK,
         no_ktp: pegawaiData.no_ktp,
         no_kk: pegawaiData.no_kk,
         alamat: pegawaiData.alamat,
@@ -208,58 +226,56 @@ export const createPegawai = async (req, res) => {
         handphone: pegawaiData.handphone,
         email_poliban: pegawaiData.email_poliban,
         foto: pegawaiData.foto,
-      
- // Foreign keys
- kol_agama: { connect: { id_agama: pegawaiData.id_agama } },
- kol_darah: { connect: { id_darah: pegawaiData.gol_darah } },
- kol_pendidikan: { connect: { id_pendidikan: pegawaiData.id_pendidikan } },
- kol_status_hidup: pegawaiData.id_status_hidup ? { connect: { id_status_hidup: pegawaiData.id_status_hidup } } : undefined,
- kol_wilayah: { connect: { id_wil: pegawaiData.id_wil } },
- kol_kabupaten: { connect: { id_kabupaten: pegawaiData.id_kabupaten } },
- kol_provinsi: { connect: { id_prov: pegawaiData.id_prov } },
- simpeg_bagian: { connect: { id_bagian: pegawaiData.id_bagian } },
- kol_jurusan: pegawaiData.id_jurusan ? { connect: { id_jurusan: pegawaiData.id_jurusan } } : undefined,
- kol_prodi: pegawaiData.id_prodi ? { connect: { id_prodi: pegawaiData.id_prodi } } : undefined,
- simpeg_jabatan_struktural: { connect: { id_jabatan_struktural: pegawaiData.id_jabatan_struktural } },
- simpeg_jabatan_fungsional: { connect: { id_jabatan_fungsional: pegawaiData.id_jabatan_fungsional } },
- simpeg_status_pegawai: { connect: { id_status_pegawai: pegawaiData.id_status_pegawai } },
 
-        // RELASI WAJIB VALID
-        kol_agama: { connect: { id_agama: parseInt(pegawaiData.id_agama) } },
-        kol_darah: { connect: { id_darah: parseInt(pegawaiData.gol_darah) } },
-        kol_pendidikan: { connect: { id_pendidikan: pegawaiData.id_pendidikan.toString() } },
-      kol_status_hidup: { connect: { id_status_hidup: pegawaiData.id_status_hidup.toString() } },
-        kol_wilayah: { connect: { id_wil: pegawaiData.id_wil } },
-        kol_kabupaten: { connect: { id_kabupaten: pegawaiData.id_kabupaten } },
-        kol_provinsi: { connect: { id_prov: pegawaiData.id_prov } },
-        simpeg_bagian: { connect: { id_bagian: parseInt(pegawaiData.id_bagian) } },
-        kol_jurusan: { connect: { id_jurusan: parseInt(pegawaiData.id_jurusan) } },
-        kol_prodi: { connect: { id_prodi: parseInt(pegawaiData.id_prodi) } },
-        simpeg_jabatan_struktural: { connect: { id_jabatan_struktural: parseInt(pegawaiData.id_jabatan_struktural) } },
-        simpeg_jabatan_fungsional: { connect: { id_jabatan_fungsional: parseInt(pegawaiData.id_jabatan_fungsional) } },
-        simpeg_status_pegawai: { connect: { id_status_pegawai: parseInt(pegawaiData.id_status_pegawai) } },
-        kol_jk: { connect: { id_jk: parseInt(pegawaiData.jk) } },
-      },
-  
+        // Relasi, hanya connect jika ada nilai
+    kol_agama: pegawaiData.id_agama
+      ? { connect: { id_agama: parseInt(pegawaiData.id_agama) } }
+      : undefined,
+    kol_darah: pegawaiData.gol_darah
+      ? { connect: { id_darah: parseInt(pegawaiData.gol_darah) } }
+      : undefined,
+    kol_status_hidup: pegawaiData.id_status_hidup
+  ? { connect: { id_status_hidup: String(pegawaiData.id_status_hidup) } }
+  : undefined,
+kol_wilayah: pegawaiData.id_wil
+  ? { connect: { id_wil: String(pegawaiData.id_wil) } }
+  : undefined,
+kol_kabupaten: pegawaiData.id_kabupaten
+  ? { connect: { id_kabupaten: String(pegawaiData.id_kabupaten) } }
+  : undefined,
+kol_provinsi: pegawaiData.id_prov
+  ? { connect: { id_prov: String(pegawaiData.id_prov) } }
+  : undefined,
+kol_pendidikan: pegawaiData.id_pendidikan
+  ? { connect: { id_pendidikan: String(pegawaiData.id_pendidikan) } }
+  : undefined,
+    simpeg_bagian: pegawaiData.id_bagian
+      ? { connect: { id_bagian: pegawaiData.id_bagian } }
+      : undefined,
+    kol_jurusan: pegawaiData.id_jurusan
+      ? { connect: { id_jurusan: pegawaiData.id_jurusan } }
+      : undefined,
+    kol_prodi: pegawaiData.id_prodi
+      ? { connect: { id_prodi: pegawaiData.id_prodi } }
+      : undefined,
+    simpeg_jabatan_struktural: pegawaiData.id_jabatan_struktural
+      ? { connect: { id_jabatan_struktural: pegawaiData.id_jabatan_struktural } }
+      : undefined,
+    simpeg_jabatan_fungsional: pegawaiData.id_jabatan_fungsional
+      ? { connect: { id_jabatan_fungsional: pegawaiData.id_jabatan_fungsional } }
+      : undefined,
+    simpeg_status_pegawai: pegawaiData.id_status_pegawai
+      ? { connect: { id_status_pegawai: pegawaiData.id_status_pegawai } }
+      : undefined,
+    kol_jk: pegawaiData.jk
+      ? { connect: { id_jk: pegawaiData.jk } }
+      : undefined,
+  }
+});
         
-      //   // HANYA BUAT CONNECT JIKA VALID
-      //   ...(pegawaiData.id_riwayat_pangkat &&
-      //     !isNaN(parseInt(pegawaiData.id_riwayat_pangkat)) && {
-      //       simpeg_riwayat_pangkat: {
-      //         connect: { id_riwayat_pangkat: parseInt(pegawaiData.id_riwayat_pangkat) }
-      //       }
-      //     }),
-      
-      //   ...(pegawaiData.id_riwayat_pendidikan &&
-      //     !isNaN(parseInt(pegawaiData.id_riwayat_pendidikan)) && {
-      //       simpeg_riwayat_pendidikan: {
-      //         connect: { id_riwayat_pendidikan: parseInt(pegawaiData.id_riwayat_pendidikan) }
-      //       }
-      //     }),
-      // }
-    });
 
-    // Cek apakah username sudah ada
+    
+    // Buat akun user jika belum ada
     const existingUser = await prisma.users.findUnique({
       where: { username: pegawaiData.nip }
     });
@@ -269,10 +285,10 @@ export const createPegawai = async (req, res) => {
       userAccount = await prisma.users.create({
         data: {
           username: pegawaiData.nip,
-          password: defaultPassword, // Sebaiknya gunakan bcrypt untuk hash password
+          password: defaultPassword,
           nama_lengkap: pegawaiData.nama_pegawai,
           email: pegawaiData.email_poliban,
-          level: 2, // Level 2 untuk pegawai biasa
+          level: 2,
           aktif: 'Y',
           blokir: 'N'
         }
@@ -284,10 +300,11 @@ export const createPegawai = async (req, res) => {
       data: Pegawai,
       userAccount: userAccount ? {
         username: userAccount.username,
-        password: defaultPassword, // Hanya untuk demo, jangan tampilkan password di produksi
+        password: defaultPassword,
         role: 'Pegawai'
       } : null
     });
+
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({
@@ -296,6 +313,8 @@ export const createPegawai = async (req, res) => {
     });
   }
 };
+
+
 
 
 
@@ -492,29 +511,34 @@ export const updatePegawai = async (req, res) => {
 export const deletePegawai = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Check if pegawai exists
     const existingPegawai = await prisma.simpeg_pegawai.findUnique({
       where: { id_pegawai: parseInt(id) }
     });
-    
+
     if (!existingPegawai) {
       return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
     }
-    
-    // Delete pegawai
+
+    // Hapus user yang terkait dengan pegawai (berdasarkan NIP sebagai username)
+    await prisma.users.deleteMany({
+      where: { username: existingPegawai.nip }
+    });
+
+    // Hapus pegawai
     await prisma.simpeg_pegawai.delete({
       where: { id_pegawai: parseInt(id) }
     });
-    
+
     res.json({
-      message: 'Pegawai berhasil dihapus'
+      message: 'Pegawai dan user terkait berhasil dihapus'
     });
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ 
-      message: 'Terjadi kesalahan saat menghapus pegawai', 
-      error: error.message 
+    res.status(500).json({
+      message: 'Terjadi kesalahan saat menghapus pegawai',
+      error: error.message
     });
   }
 };

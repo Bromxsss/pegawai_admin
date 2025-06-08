@@ -19,6 +19,9 @@ const router = express.Router();
 router.get('/profile/me', verifyToken, isPegawai, getProfilePegawai);
 router.put('/profile/:id', verifyToken, isOwner, upload.single('foto'), updateDataProfil);
 
+// Rute untuk request perubahan data sensitif
+router.post('/profile/request-sensitive/:id', verifyToken, isOwner, requestSensitiveDataChange);
+
 
 // untuk menampilkan foto
 router.get('/foto/:filename', verifyToken, isPegawai, (req, res) => {

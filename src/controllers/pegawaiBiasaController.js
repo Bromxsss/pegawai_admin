@@ -100,6 +100,7 @@ export const getProfilePegawai = async (req, res) => {
 };
 
 
+
 // Update data non-sensitif (Pegawai)
 // filepath: [pegawai.controller.js](http://_vscodecontentref_/12)
 export const updateDataProfil = async (req, res) => {
@@ -114,6 +115,11 @@ export const updateDataProfil = async (req, res) => {
       'tempat_lahir',
       'tgl_lahir',
       'alamat',
+      'id_agama',
+      'id_darah',
+      'id_wil',
+      'id_prov',
+      'id_kabupaten',
       'kota',
       'kode_pos',
       'handphone',
