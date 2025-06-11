@@ -6,6 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { get } from 'http';
 
 
 
@@ -359,8 +360,8 @@ export const getPegawaiById = async (req, res) => {
     // Lakukan mapping dari ID ke nama jika diperlukan (pastikan mapping-nya tersedia)
     const pegawaiDetail = {
       ...pegawai,
-      gol_darah: darahMapping[pegawai.gol_darah] ?? pegawai.kol_darah?.nama ?? null,
-      id_pendidikan: pendidikanMapping[pegawai.id_pendidikan] ?? pegawai.kol_pendidikan?.nama ?? null,
+      gol_darah: darahMapping[pegawai.gol_darah] ?? pegawai.kol_darah?.nama_darah ?? null,
+      id_pendidikan: pendidikanMapping[pegawai.id_pendidikan] ?? pegawai.kol_pendidikan?.nama_pendidikan ?? null,
       id_status_hidup: statusHidupMapping[pegawai.id_status_hidup] ?? pegawai.kol_status_hidup?.nama ?? null,
       id_jurusan: jurusanMapping[pegawai.id_jurusan] ?? pegawai.kol_jurusan?.nama ?? null,
       jk: jkMapping[pegawai.jk] ?? pegawai.jk,
@@ -544,76 +545,176 @@ export const deletePegawai = async (req, res) => {
 };
 
 
-
-// PINDAH KE pegawaiBiasController.js
-// Update data non-sensitif (Pegawai)
-// filepath: [pegawai.controller.js](http://_vscodecontentref_/12)
-// export const updateNonSensitiveData = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const updateData = req.body || {};
-
-//     // Daftar field yang boleh diupdate oleh pegawai sendiri
-//     const allowedFields = [
-//       'nama_pegawai',
-//       'jk',
-//       'tempat_lahir',
-//       'tgl_lahir',
-//       'alamat',
-//       'kota',
-//       'kode_pos',
-//       'handphone',
-//       'email_poliban',
-//       'foto'
-//     ];
-
-//     // Filter hanya field yang diizinkan
-//     const filteredData = {};
-//     for (const key of allowedFields) {
-//       if (Object.prototype.hasOwnProperty.call(updateData, key)) {
-//         filteredData[key] = updateData[key];
-//       }
-//     }
-
-//     // Jika ada upload file foto, tambahkan ke filteredData
-//     if (req.file) {
-//       filteredData.foto = req.file.filename;
-//     }
-
-//     if (Object.keys(filteredData).length === 0) {
-//       return res.status(400).json({ message: 'Tidak ada data yang boleh diupdate' });
-//     }
-
-//     // Cek apakah pegawai ada
-//     const pegawai = await prisma.simpeg_pegawai.findUnique({
-//       where: { id_pegawai: parseInt(id) }
-//     });
-
-//     if (!pegawai) {
-//       return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
-//     }
-
-//     // Update data non-sensitif
-//     const updatedPegawai = await prisma.simpeg_pegawai.update({
-//       where: { id_pegawai: parseInt(id) },
-//       data: filteredData
-//     });
-
-//     res.json({
-//       message: 'Data non-sensitif berhasil diperbarui',
-//       data: updatedPegawai
-//     });
-//   } catch (error) {
-//     console.error('Error:', error);
-//     res.status(500).json({
-//       message: 'Terjadi kesalahan saat memperbarui data non-sensitif',
-//       error: error.message
-//     });
-//   }
-// };
+export const getProfilePegawai = async (req, res) => {
+ try {
+    const id_pegawai = req.user.id_pegawai;
 
 
+    const pegawai = await prisma.simpeg_pegawai.findUnique({
+      where: { id_pegawai: id_pegawai },
+      include: {
+        //simpeg_riwayat_pangkat: true, // <--- Sementara dimatikan
+        // simpeg_riwayat_pendidikan: true,
+        kol_agama: true,
+        kol_darah: true,
+        kol_status_hidup: true,
+        kol_pendidikan: true,
+        kol_wilayah: true,
+        kol_kabupaten: true,
+        kol_provinsi: true,
+        simpeg_bagian: true,
+        kol_jurusan: true,
+        kol_prodi: true,
+        simpeg_jabatan_struktural: true,
+        simpeg_jabatan_fungsional: true
+      }
+    });
 
+    if (!pegawai) {
+      return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
+    }
+    return res.json(pegawai);
+
+
+  } catch (error) {
+    console.error('Error saat mengambil detail pegawai:', error);
+    return res.status(500).json({ 
+      message: 'Terjadi kesalahan saat mengambil detail pegawai', 
+      error: error.message 
+    });
+  }
+};
+
+
+// update data profil pegawai (Pegawai) ini adalah bagian yang non sentivie artinya pegawai bisa update sendiri data yang tidak termasuk kedalam data sensitive
+export const updateDataProfil = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body || {};
+
+    // Daftar field yang boleh diupdate oleh pegawai sendiri
+    const allowedFields = [
+      'nama_pegawai',
+      'jk',
+      'tempat_lahir',
+      'tgl_lahir',
+      'gol_darah',
+      'alamat',
+      'no_ktp',
+      'no_kk',
+      'id_agama',
+      'id_pendidikan',
+      'id_wil',
+      'id_prov',
+      'id_kabupaten',
+      'kota',
+      'kode_pos',
+      'handphone',
+      'email_poliban',
+      'foto'
+    ];
+
+    // Filter hanya field yang diizinkan
+    const filteredData = {};
+    for (const key of allowedFields) {
+      if (Object.prototype.hasOwnProperty.call(updateData, key)) {
+        filteredData[key] = updateData[key];
+      }
+    }
+
+    // Jika ada upload file foto, tambahkan ke filteredData
+    if (req.file) {
+      filteredData.foto = req.file.filename;
+    }
+
+    if (Object.keys(filteredData).length === 0) {
+      return res.status(400).json({ message: 'Tidak ada data yang boleh diupdate' });
+    }
+
+    const sensitiveFields = [
+  'nama_pegawai','id_pendidikan', 'no_ktp', 'no_kk', 'id_agama', 'email_poliban'
+];
+    // Cek apakah pegawai ada
+    const pegawai = await prisma.simpeg_pegawai.findUnique({
+      where: { id_pegawai: parseInt(id) }
+    });
+
+    if (!pegawai) {
+      return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
+    }
+
+    // Cek field sensitif: jika sudah ada isinya, tolak update langsung
+    for (const field of sensitiveFields) {
+  if (
+    Object.prototype.hasOwnProperty.call(filteredData, field) &&
+    pegawai[field] !== null && pegawai[field] !== undefined && pegawai[field] !== ''
+  ) {
+    return res.status(403).json({
+      message: `Perubahan ${field} harus melalui permintaan perubahan data (request sensitive data change)`
+    });
+  }
+}
+if (filteredData.jk !== undefined) filteredData.jk = parseInt(filteredData.jk);
+if (filteredData.gol_darah !== undefined && filteredData.gol_darah !== null && filteredData.gol_darah !== '') {
+  filteredData.gol_darah = parseInt(filteredData.gol_darah);
+  if (isNaN(filteredData.gol_darah)) delete filteredData.gol_darah;
+}
+if (filteredData.id_agama !== undefined) filteredData.id_agama = parseInt(filteredData.id_agama);
+if (filteredData.id_pendidikan !== undefined && filteredData.id_pendidikan !== null) {
+  filteredData.id_pendidikan = String(filteredData.id_pendidikan);
+}
+if (filteredData.tgl_lahir) {
+  const date = new Date(filteredData.tgl_lahir);
+  if (!isNaN(date.getTime())) {
+    filteredData.tgl_lahir = date;
+  } else {
+    delete filteredData.tgl_lahir;
+  }
+}
+
+    // Update data non-sensitif
+    const updatedPegawai = await prisma.simpeg_pegawai.update({
+      where: { id_pegawai: parseInt(id) },
+      data: filteredData
+    });
+
+    // update perubahan juga di tabel users
+    const user = await prisma.users.findFirst({
+      where: { username: pegawai.nip }
+    });
+    if (user) {
+      const updateUserData = {};
+      if (filteredData.nama_pegawai) {
+        updateUserData.nama_lengkap = filteredData.nama_pegawai;
+      }
+      if (filteredData.email_poliban) {
+        updateUserData.email = filteredData.email_poliban;
+      }
+      if (Object.keys(updateUserData).length > 0) {
+        await prisma.users.update({
+          where: { id_user: user.id_user },
+          data: updateUserData
+        });
+      }
+    }
+    res.json({
+      message: 'Data berhasil diperbarui',
+      data: updatedPegawai
+    });
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({
+      message: 'Terjadi kesalahan saat memperbarui data non-sensitif',
+      error: error.message
+    });
+  }
+};
+
+
+
+
+// pengajuan perubahan data sensitif (pegawai)
 export const requestSensitiveDataChange = async (req, res) => {
   try {
     const { id } = req.params;
@@ -633,10 +734,30 @@ export const requestSensitiveDataChange = async (req, res) => {
       return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
     }
 
+    // Validasi field yang wajib bisa request perubahan
+    const allowedFields = [
+      'nama_pegawai',
+      'nip',
+      'nidn', 
+      'NUPTK',
+      'id_jabatan_struktural',
+      'id_jabatan_fungsional',
+      'id_bagian',
+      'id_jurusan',
+      'id_prodi',
+      'id_status_hidup',
+      'id_status_pegawai',
+      'id_pendidikan',
+      'no_ktp',
+      'no_kk',
+      'email_poliban',
+
+    ];
+    
     // Buat permintaan perubahan data
     const changeRequest = await prisma.data_change_requests.create({
       data: {
-        id_pegawai: parseInt(id), // Corrected here
+        // id_pegawai: parseInt(id), // Corrected here
         field_name: field,
         current_value: pegawai[field]?.toString() || '',
         requested_value: newValue.toString(),
@@ -649,6 +770,13 @@ export const requestSensitiveDataChange = async (req, res) => {
       }
     });
 
+    // kirimkan otomatis nama dan email pegawai yang mengajukan
+    const user = await prisma.users.findFirst({
+      where: { username: pegawai.nip },
+      select: { nama_lengkap: true, email: true }
+    });
+
+    
     res.status(201).json({
       message: 'Permintaan perubahan data berhasil diajukan',
       data: changeRequest
@@ -661,6 +789,11 @@ export const requestSensitiveDataChange = async (req, res) => {
     });
   }
 };
+
+
+
+
+
 
 // Mengelola permintaan perubahan data (Admin)
 export const processDataChangeRequest = async (req, res) => {
@@ -692,14 +825,52 @@ export const processDataChangeRequest = async (req, res) => {
       }
     });
 
-    // Jika disetujui, update data pegawai
+    // Ambil data pegawai sebelum update
+    const pegawai = await prisma.simpeg_pegawai.findUnique({
+      where: { id_pegawai: changeRequest.id_pegawai }
+    });
+
+    if (!pegawai) {
+      return res.status(404).json({ message: 'Pegawai tidak ditemukan' });
+    }
+
+    // Jika disetujui, update data pegawai dan users
     if (status === 'approved') {
+      // Update data pegawai
       await prisma.simpeg_pegawai.update({
         where: { id_pegawai: changeRequest.id_pegawai },
         data: {
           [changeRequest.field_name]: changeRequest.requested_value
         }
       });
+
+      // Update juga tabel users jika field yang diubah adalah nama, email, atau nip
+      if (
+        ['nama_pegawai', 'email_poliban', 'nip'].includes(changeRequest.field_name)
+      ) {
+        // Cari user berdasarkan username lama (nip lama)
+        const user = await prisma.users.findFirst({
+          where: { username: pegawai.nip }
+        });
+        if (user) {
+          const updateUserData = {};
+          if (changeRequest.field_name === 'nama_pegawai') {
+            updateUserData.nama_lengkap = changeRequest.requested_value;
+          }
+          if (changeRequest.field_name === 'email_poliban') {
+            updateUserData.email = changeRequest.requested_value;
+          }
+          if (changeRequest.field_name === 'nip') {
+            updateUserData.username = changeRequest.requested_value;
+          }
+          if (Object.keys(updateUserData).length > 0) {
+            await prisma.users.update({
+              where: { id_user: user.id_user },
+              data: updateUserData
+            });
+          }
+        }
+      }
     }
 
     res.json({
@@ -714,6 +885,8 @@ export const processDataChangeRequest = async (req, res) => {
     });
   }
 };
+
+
 
 // Mengambil semua permintaan perubahan data
 export const getAllDataChangeRequests = async (req, res) => {
@@ -749,6 +922,8 @@ export const getAllDataChangeRequests = async (req, res) => {
   }
 };
 
+
+
 // Mengambil detail permintaan perubahan data
 export const getDataChangeRequestById = async (req, res) => {
   try {
@@ -769,12 +944,12 @@ export const getDataChangeRequestById = async (req, res) => {
 
     // Ambil data pegawai terkait
     const pegawai = await prisma.simpeg_pegawai.findUnique({
-      where: { id_pegawai: changeRequest.pegawai_id },
-      select: {
-        nama_pegawai: true,
-        nip: true
-      }
-    });
+  where: { id_pegawai: changeRequest.id_pegawai },
+  select: {
+    nama_pegawai: true,
+    nip: true
+  }
+});
 
     res.json({
       ...changeRequest,
@@ -795,5 +970,6 @@ export default {
   createPegawai,
   getPegawaiById,
   requestSensitiveDataChange,
+  getProfilePegawai
   // Add other exports as needed
 };

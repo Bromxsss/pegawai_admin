@@ -9,13 +9,15 @@ import {
   updatePegawai,
   deletePegawai,
   // updateNonSensitiveData,
+  getProfilePegawai,
+  updateDataProfil,
   requestSensitiveDataChange,
   getAllDataChangeRequests,
   getDataChangeRequestById,
   processDataChangeRequest,
   upload
 } from '../controllers/pegawai.controller.js';
-import { verifyToken, isAdminPegawai, isOwner} from '../middlewares/auth.js';
+import { verifyToken, isAdminPegawai, isPegawai, isOwner} from '../middlewares/auth.js';
 // import upload from '../middleware/uploadMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,8 +39,10 @@ router.delete('/:id', verifyToken, isAdminPegawai, deletePegawai);
 
 
 // Routes untuk Pegawai (update data sensitif dan non-sensitif)
-// router.put('/profile/non-sensitive/:id', verifyToken, isOwner, upload.single('foto'), updateNonSensitiveData);
-//router.post('/profile/request-sensitive/:id', verifyToken, requestSensitiveDataChange);
+router.get('/profile/me', verifyToken, isPegawai, getProfilePegawai);
+router.put('/profile/:id', verifyToken, isOwner, upload.single('foto'), updateDataProfil);
+router.post('/profile/request-sensitive/:id', verifyToken, requestSensitiveDataChange);
+
 
 // Routes untuk Admin (mengelola permintaan perubahan data)
 router.get('/admin/change-requests', verifyToken, isAdminPegawai, getAllDataChangeRequests);
