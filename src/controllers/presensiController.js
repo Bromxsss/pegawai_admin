@@ -1,0 +1,45 @@
+// src/controller/presensiController.js
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+export const createPresensi = async (req, res) => {
+  try {
+    const { id_pegawai, tanggal, status } = req.body;
+
+    if (!id_pegawai || !tanggal || !status) {
+      return res.status(400).json({ message: "Data tidak lengkap." });
+    }
+
+    // Pastikan id_pegawai memang ada di tabela simpeg_pegawai
+    const pegawai = await prisma.simpeg_pegawai.findUnique({ where: { id_pegawai } });
+    if (!pegawai) {
+      return res.status(404).json({ message: "Pegawai tidak ditemukan." });
+    }
+
+    const newPresensi = await prisma.presensi.create({ 
+      data: {
+        id_pegawai: Number(id_pegawai),
+        tanggal: new Date(tanggal),
+        status,
+      },
+    });
+
+    res.status(201).json({ message: "Presensi berhasil disimpan.", presensi: newPresensi });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Terjadi kesalahan.", error });
+  }
+};
+
+export const getAllPresensi = async (req, res) => {
+  try {
+    const presensi = await prisma.presensi.findMany({ 
+      include: { simpeg_pegawai: true } 
+    });
+    res.json({ presensi });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Terjadi kesalahan.", error });
+  }
+};
+
