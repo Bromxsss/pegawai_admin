@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export const createPresensi = async (req, res) => {
   try {
-    const { id_pegawai, tanggal, status } = req.body;
+    const { id_pegawai, tanggal, status, jam_masuk, jam_keluar } = req.body;
 
     if (!id_pegawai || !tanggal || !status) {
       return res.status(400).json({ message: "Data tidak lengkap." });
@@ -21,6 +21,8 @@ export const createPresensi = async (req, res) => {
         id_pegawai: Number(id_pegawai),
         tanggal: new Date(tanggal),
         status,
+        jam_masuk: jam_masuk ? new Date(`1970-01-01T${jam_masuk}.000Z`) : null,
+        jam_keluar: jam_keluar ? new Date(`1970-01-01T${jam_keluar}.000Z`) : null,
       },
     });
 
