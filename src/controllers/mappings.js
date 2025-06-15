@@ -1,9 +1,9 @@
 // Mapping dari id ke deskripsi
 const darahMapping = {
-  'A': 'A',
-  'B': 'B',
-  'O': 'O',
-  'AB': 'AB'
+  1: 'A',
+  2: 'B',
+  3: 'O',
+  4: 'AB'
 };
 
   

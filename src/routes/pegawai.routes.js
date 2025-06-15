@@ -34,12 +34,12 @@ router.get('/:id', verifyToken, isAdminPegawai, getPegawaiById);
 router.put('/:id', verifyToken, isAdminPegawai, upload.single('foto'), updatePegawai);
 router.delete('/:id', verifyToken, isAdminPegawai, deletePegawai);
 
-
+// Routes untuk 
 
 
 
 // Routes untuk Pegawai (update data sensitif dan non-sensitif)
-router.get('/profile/me', verifyToken, isPegawai, getProfilePegawai);
+router.get('/profile/me', verifyToken, getProfilePegawai);
 router.put('/profile/:id', verifyToken, isOwner, upload.single('foto'), updateDataProfil);
 router.post('/profile/request-sensitive/:id', verifyToken, requestSensitiveDataChange);
 

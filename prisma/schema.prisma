@@ -157,58 +157,59 @@ model simpeg_level_pendidikan {
 }
 
 model simpeg_pangkat_gol_ruang {
-  id_pangkat_gol_ruang   Int    @id @default(autoincrement())
-  nama_pangkat_gol_ruang String @db.VarChar(50)
+  id_pangkat_gol_ruang   Int                      @id @default(autoincrement())
+  nama_pangkat_gol_ruang String                   @db.VarChar(50)
   simpeg_riwayat_pangkat simpeg_riwayat_pangkat[]
 }
 
 model simpeg_pegawai {
   id_pegawai                Int                         @id @default(autoincrement()) @db.SmallInt
-  nama_pegawai              String                     @db.VarChar(60)
-  jk                        Int?                         @db.SmallInt
-  id_agama                  Int?                         @db.TinyInt
+  nama_pegawai              String                      @db.VarChar(60)
+  jk                        Int?                        @db.SmallInt
+  id_agama                  Int?                        @db.TinyInt
   tempat_lahir              String?                     @db.VarChar(40)
   tgl_lahir                 DateTime?                   @db.Date
   nidn                      String                      @db.Char(10)
   nip                       String                      @db.Char(18)
-  NUPTK                     String                    @db.VarChar(20)
-  no_ktp                    String?                      @db.Char(16)
-  no_kk                     String?                      @db.Char(16)
-  gol_darah                 Int?                         @db.SmallInt
-  id_pendidikan             String?                      @db.Char(2)
-  id_status_hidup           String                     @db.Char(1)
-  alamat                    String?                      @db.VarChar(255)
+  NUPTK                     String                      @db.VarChar(20)
+  no_ktp                    String?                     @db.Char(16)
+  no_kk                     String?                     @db.Char(16)
+  gol_darah                 Int?                        @db.SmallInt
+  id_pendidikan             String?                     @db.Char(2)
+  id_status_hidup           String?                     @db.Char(1)
+  alamat                    String?                     @db.VarChar(255)
   kota                      String?                     @db.VarChar(100)
   kode_pos                  String?                     @db.VarChar(5)
   id_wil                    String?                     @db.Char(8)
-  id_kabupaten              String?                      @db.Char(10)
-  id_prov                   String?                      @db.Char(2)
-  handphone                 String?                      @default("") @db.VarChar(20)
-  email_poliban             String?                      @db.VarChar(150)
-  id_jabatan_struktural     Int                         @db.SmallInt
-  id_jabatan_fungsional     Int
-  id_status_pegawai         Int                         @db.TinyInt
-  id_jurusan                Int                        @db.TinyInt
-  id_bagian                 Int                         @db.TinyInt
-  id_prodi                  Int                       @db.TinyInt
+  id_kabupaten              String?                     @db.Char(10)
+  id_prov                   String?                     @db.Char(2)
+  handphone                 String?                     @default("") @db.VarChar(20)
+  email_poliban             String?                     @db.VarChar(150)
+  id_jabatan_struktural     Int?                        @db.SmallInt
+  id_jabatan_fungsional     Int?
+  id_status_pegawai         Int?                        @db.TinyInt
+  id_jurusan                Int?                        @db.TinyInt
+  id_bagian                 Int?                        @db.TinyInt
+  id_prodi                  Int?                        @db.TinyInt
   foto                      String?                     @default("blm_ada_foto.jpg") @db.VarChar(255)
   data_change_requests      data_change_requests[]
-  simpeg_jabatan_fungsional simpeg_jabatan_fungsional   @relation(fields: [id_jabatan_fungsional], references: [id_jabatan_fungsional], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_1")
-  kol_status_hidup          kol_status_hidup           @relation(fields: [id_status_hidup], references: [id_status_hidup], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_10")
-  kol_kabupaten             kol_kabupaten?               @relation(fields: [id_kabupaten], references: [id_kabupaten], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_11")
-  kol_provinsi              kol_provinsi?                @relation(fields: [id_prov], references: [id_prov], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_14")
-  kol_pendidikan            kol_pendidikan?              @relation(fields: [id_pendidikan], references: [id_pendidikan], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_15")
+  simpeg_jabatan_fungsional simpeg_jabatan_fungsional?  @relation(fields: [id_jabatan_fungsional], references: [id_jabatan_fungsional], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_1")
+  kol_status_hidup          kol_status_hidup?           @relation(fields: [id_status_hidup], references: [id_status_hidup], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_10")
+  kol_kabupaten             kol_kabupaten?              @relation(fields: [id_kabupaten], references: [id_kabupaten], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_11")
+  kol_provinsi              kol_provinsi?               @relation(fields: [id_prov], references: [id_prov], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_14")
+  kol_pendidikan            kol_pendidikan?             @relation(fields: [id_pendidikan], references: [id_pendidikan], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_15")
   kol_wilayah               kol_wilayah?                @relation(fields: [id_wil], references: [id_wil], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_16")
-  kol_agama                 kol_agama?                   @relation(fields: [id_agama], references: [id_agama], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_17")
-  kol_darah                 kol_darah?                   @relation(fields: [gol_darah], references: [id_darah], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_18")
-  simpeg_jabatan_struktural simpeg_jabatan_struktural   @relation(fields: [id_jabatan_struktural], references: [id_jabatan_struktural], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_2")
-  simpeg_bagian             simpeg_bagian               @relation(fields: [id_bagian], references: [id_bagian], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_3")
-  simpeg_status_pegawai     simpeg_status_pegawai       @relation(fields: [id_status_pegawai], references: [id_status_pegawai], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_4")
-  kol_jk                    kol_jk?                      @relation(fields: [jk], references: [id_jk], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_7")
-  kol_jurusan               kol_jurusan                @relation(fields: [id_jurusan], references: [id_jurusan], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_8")
-  kol_prodi                 kol_prodi                 @relation(fields: [id_prodi], references: [id_prodi], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_9")
+  kol_agama                 kol_agama?                  @relation(fields: [id_agama], references: [id_agama], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_17")
+  kol_darah                 kol_darah?                  @relation(fields: [gol_darah], references: [id_darah], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_18")
+  simpeg_jabatan_struktural simpeg_jabatan_struktural?  @relation(fields: [id_jabatan_struktural], references: [id_jabatan_struktural], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_2")
+  simpeg_bagian             simpeg_bagian?              @relation(fields: [id_bagian], references: [id_bagian], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_3")
+  simpeg_status_pegawai     simpeg_status_pegawai?      @relation(fields: [id_status_pegawai], references: [id_status_pegawai], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_4")
+  kol_jk                    kol_jk?                     @relation(fields: [jk], references: [id_jk], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_7")
+  kol_jurusan               kol_jurusan?                @relation(fields: [id_jurusan], references: [id_jurusan], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_8")
+  kol_prodi                 kol_prodi?                  @relation(fields: [id_prodi], references: [id_prodi], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_pegawai_ibfk_9")
   simpeg_riwayat_pangkat    simpeg_riwayat_pangkat[]
   simpeg_riwayat_pendidikan simpeg_riwayat_pendidikan[]
+  presensi                 presensi[]
 
   @@index([gol_darah], map: "gol_darah")
   @@index([id_agama], map: "id_agama")
@@ -234,15 +235,16 @@ model simpeg_pendanaan {
 }
 
 model simpeg_riwayat_pangkat {
-  id_riwayat_pangkat    Int            @id @default(autoincrement())
-  id_pegawai            Int            @db.SmallInt
-  id_pangkat_gol_ruang  Int            
-  tmt_pangkat_gol_ruang DateTime?      @db.Date
-  no_sk                 String         @db.VarChar(30)
-  tgl_sk                DateTime?      @db.Date
-  pejabat_penetap       String         @db.VarChar(50)
-  simpeg_pegawai        simpeg_pegawai @relation(fields: [id_pegawai], references: [id_pegawai], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_riwayat_pangkat_ibfk_3")
+  id_riwayat_pangkat       Int                      @id @default(autoincrement())
+  id_pegawai               Int                      @db.SmallInt
+  id_pangkat_gol_ruang     Int
+  tmt_pangkat_gol_ruang    DateTime?                @db.Date
+  no_sk                    String                   @db.VarChar(30)
+  tgl_sk                   DateTime?                @db.Date
+  pejabat_penetap          String                   @db.VarChar(50)
+  simpeg_pegawai           simpeg_pegawai           @relation(fields: [id_pegawai], references: [id_pegawai], onDelete: NoAction, onUpdate: NoAction, map: "simpeg_riwayat_pangkat_ibfk_3")
   simpeg_pangkat_gol_ruang simpeg_pangkat_gol_ruang @relation(fields: [id_pangkat_gol_ruang], references: [id_pangkat_gol_ruang])
+
   @@index([id_pangkat_gol_ruang], map: "id_pangkat_gol_ruang")
   @@index([id_pegawai], map: "id_pegawai")
 }
@@ -297,6 +299,19 @@ model users {
   ket          String?      @db.VarChar(255)
 }
 
+model presensi {
+  id_presensi Int             @id @default(autoincrement())
+  id_pegawai  Int             @db.SmallInt
+  tanggal     DateTime        @db.Date
+  status      presensi_status
+  jam_masuk   DateTime?       @db.Time(0)
+  jam_keluar  DateTime?       @db.Time(0)
+  simpeg_pegawai simpeg_pegawai  @relation(fields: [id_pegawai], references: [id_pegawai], onDelete: NoAction, onUpdate: NoAction, map: "presensi_ibfk_1")
+
+
+  @@index([id_pegawai], map: "id_pegawai")
+}
+
 enum users_aktif {
   Y
   T
@@ -310,4 +325,9 @@ enum users_blokir {
 enum kol_prodi_aktif {
   Y
   T
+}
+
+enum presensi_status {
+  Hadir
+  Pulang
 }
