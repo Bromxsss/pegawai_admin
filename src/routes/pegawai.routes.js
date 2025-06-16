@@ -43,6 +43,22 @@ router.get('/profile/me', verifyToken, getProfilePegawai);
 router.put('/profile/:id', verifyToken, isOwner, upload.single('foto'), updateDataProfil);
 router.post('/profile/request-sensitive/:id', verifyToken, requestSensitiveDataChange);
 
+// route untuk menampilkan foto pegawai dari pegawai biasa
+router.get('/profile/foto-pegawai/:filename', verifyToken, isPegawai, (req, res) => {
+  const { filename } = req.params;
+  const filePath = path.join(__dirname, '../controllers/uploads', filename);
+  
+  // Tambahkan log untuk memeriksa jalur file
+  console.log('File path:', filePath);
+  
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error sending file:', err);
+      res.status(404).json({ message: 'Foto tidak ditemukan' });
+    }
+  });
+});
+
 
 // Routes untuk Admin (mengelola permintaan perubahan data)
 router.get('/admin/change-requests', verifyToken, isAdminPegawai, getAllDataChangeRequests);
