@@ -21,7 +21,7 @@ export const verifyToken = (req, res, next) => {
 
 // Middleware untuk memeriksa role admin pegawai
 export const isAdminPegawai = (req, res, next) => {
-  if (req.user.role !== 1) { // Asumsi role 1 adalah admin pegawai
+  if (req.user.role !==6) { // Asumsi role 6 dalah admin pegawai
     return res.status(403).json({ message: 'Akses ditolak. Hanya admin pegawai yang diizinkan.' });
   }
   next();
@@ -30,7 +30,7 @@ export const isAdminPegawai = (req, res, next) => {
 
 // Middleware untuk memeriksa role pegawai biasa
 export const isPegawai = (req, res, next) => {
-  if (req.user.role !== 2) { // Asumsi role 2 adalah pegawai biasa
+  if (req.user.role !== 7) { // Asumsi role 2 adalah pegawai biasa
     return res.status(403).json({ message: 'Akses ditolak. Hanya pegawai yang diizinkan.' });
   }
   next();
@@ -40,7 +40,7 @@ export const isPegawai = (req, res, next) => {
 export const isOwner = (req, res, next) => {
   const pegawaiId = parseInt(req.params.id_pegawai || req.params.id);
 
-  if (req.user.role === 1) {
+  if (req.user.role === 6) {
     // Admin boleh akses semua data
     return next();
   }
