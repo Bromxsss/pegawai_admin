@@ -40,76 +40,46 @@ export { upload };
 export const getAllPegawai = async (req, res) => {
   try {
     const pegawaiList = await prisma.simpeg_pegawai.findMany({
-      include: {
-        kol_jk: { select: { nama_jk: true } },
-        kol_agama: { select: { nama_agama: true } },
-        kol_darah: { select: { nama_darah: true } },
-        kol_pendidikan: { select: { nama_pendidikan: true } },
-        kol_status_hidup: { select: { nama_status_hidup: true } },
-        kol_wilayah: { select: { nm_wil: true } },
-        kol_kabupaten: { select: { nama_kabupaten: true } },
-        kol_provinsi: { select: { nama_prov: true } },
-        simpeg_jabatan_struktural: { select: { nama_jabatan_struktural: true } },
-        simpeg_jabatan_fungsional: { select: { nama_jabatan_fungsional: true } },
-        simpeg_status_pegawai: { select: { nama_status_pegawai: true } },
-        kol_jurusan: { select: { nama_jurusan: true } },
-        simpeg_bagian: { select: { nama_bagian: true } },
-        kol_prodi: { select: { nama_prodi: true } },
-        simpeg_riwayat_pangkat: {
-          select: {
-            id_riwayat_pangkat: true,
-            simpeg_pangkat_gol_ruang: {
-              select: {
-                nama_pangkat_gol_ruang: true,
-              }
-            }
-          }
-        },
-        simpeg_riwayat_pendidikan: {
-          select: {
-            id_riwayat_pendidikan: true,
-            thn_masuk: true,
-            thn_lulus: true,
-            tempat: true,
-            simpeg_level_pendidikan: {
-              select: {
-                nama_level_pendidikan: true
-              }
-            }
-          }
-        }
-      }
-    });
+      select: { 
+        id_pegawai: true, 
+        nama_pegawai: true, 
+        nip: true,
+        nidn: true,
+        NUPTK: true,
+        alamat: true,
+        foto: true,
+       } 
+      });
 
-    // Mapping agar output langsung menampilkan nama relasi, bukan objek
-    const pegawaiMapped = pegawaiList.map(p => ({
-      ...p,
-      jk: p.kol_jk?.nama_jk ?? null,
-      agama: p.kol_agama?.nama_agama ?? null,
-      gol_darah: p.kol_darah?.nama_darah ?? null,
-      pendidikan: p.kol_pendidikan?.nama_pendidikan ?? null,
-      status_hidup: p.kol_status_hidup?.nama_status_hidup ?? null,
-      wilayah: p.kol_wilayah?.nm_wil ?? null,
-      kabupaten: p.kol_kabupaten?.nama_kabupaten ?? null,
-      provinsi: p.kol_provinsi?.nama_prov ?? null,
-      jabatan_struktural: p.simpeg_jabatan_struktural?.nama_jabatan_struktural ?? null,
-      jabatan_fungsional: p.simpeg_jabatan_fungsional?.nama_jabatan_fungsional ?? null,
-      status_pegawai: p.simpeg_status_pegawai?.nama_status_pegawai ?? null,
-      jurusan: p.kol_jurusan?.nama_jurusan ?? null,
-      bagian: p.simpeg_bagian?.nama_bagian ?? null,
-      prodi: p.kol_prodi?.nama_prodi ?? null,
-      // relasi nested riwayat
-      riwayat_pangkat: p.simpeg_riwayat_pangkat?.map(rp => ({
-        ...rp,
-        pangkat_gol_ruang: rp.simpeg_pangkat_gol_ruang?.nama_pangkat_gol_ruang ?? null
-      })) ?? [],
-      riwayat_pendidikan: p.simpeg_riwayat_pendidikan?.map(rp => ({
-        ...rp,
-        level_pendidikan: rp.simpeg_level_pendidikan?.nama_level_pendidikan ?? null
-      })) ?? []
-    }));
+    // // Mapping agar output langsung menampilkan nama relasi, bukan objek
+    // const pegawaiMapped = pegawaiList.map(p => ({
+    //   ...p,
+    //   jk: p.kol_jk?.nama_jk ?? null,
+    //   agama: p.kol_agama?.nama_agama ?? null,
+    //   gol_darah: p.kol_darah?.nama_darah ?? null,
+    //   pendidikan: p.kol_pendidikan?.nama_pendidikan ?? null,
+    //   status_hidup: p.kol_status_hidup?.nama_status_hidup ?? null,
+    //   wilayah: p.kol_wilayah?.nm_wil ?? null,
+    //   kabupaten: p.kol_kabupaten?.nama_kabupaten ?? null,
+    //   provinsi: p.kol_provinsi?.nama_prov ?? null,
+    //   jabatan_struktural: p.simpeg_jabatan_struktural?.nama_jabatan_struktural ?? null,
+    //   jabatan_fungsional: p.simpeg_jabatan_fungsional?.nama_jabatan_fungsional ?? null,
+    //   status_pegawai: p.simpeg_status_pegawai?.nama_status_pegawai ?? null,
+    //   jurusan: p.kol_jurusan?.nama_jurusan ?? null,
+    //   bagian: p.simpeg_bagian?.nama_bagian ?? null,
+    //   prodi: p.kol_prodi?.nama_prodi ?? null,
+    //   // relasi nested riwayat
+    //   riwayat_pangkat: p.simpeg_riwayat_pangkat?.map(rp => ({
+    //     ...rp,
+    //     pangkat_gol_ruang: rp.simpeg_pangkat_gol_ruang?.nama_pangkat_gol_ruang ?? null
+    //   })) ?? [],
+    //   riwayat_pendidikan: p.simpeg_riwayat_pendidikan?.map(rp => ({
+    //     ...rp,
+    //     level_pendidikan: rp.simpeg_level_pendidikan?.nama_level_pendidikan ?? null
+    //   })) ?? []
+    // }));
 
-    res.json(pegawaiMapped);
+    res.json(pegawaiList);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({
@@ -122,7 +92,7 @@ export const getAllPegawai = async (req, res) => {
 
 
 
-// Tambah pegawai baru (Admin)
+
 // Tambah pegawai baru (Admin)
 export const createPegawai = async (req, res) => {
   try {
@@ -1242,11 +1212,31 @@ export const getDataChangeRequestById = async (req, res) => {
 };
 // ... existing code ...
 
+export const getAllRingkas = async (req, res) => {
+  try {
+    const pegawai = await prisma.simpeg_pegawai.findMany({ 
+      select: { 
+        id_pegawai: true, 
+        nama_pegawai: true, 
+        nip: true,
+        nidn: true,
+        NUPTK: true,
+        alamat: true,
+        foto: true,
+       } 
+    });
+    res.json(pegawai);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
   getAllPegawai,
   createPegawai,
   getPegawaiById,
   requestSensitiveDataChange,
-  getProfilePegawai
+  getProfilePegawai,
+  
   // Add other exports as needed
 };
